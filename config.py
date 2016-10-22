@@ -6,9 +6,9 @@ cfgdata = yaml.load(open(cfgfile, 'r'))
 
 OBSERVATORY = cfgdata["Observatory"]
 
-FILENAME_FITS = cfgdata["Data"]["namefits"]
-FILENAME_PNG = cfgdata["Data"]["namepng"]
-DATA_DIR = cfgdata["Data"]["dir"]
+#FILENAME_FITS = cfgdata["Data"]["namefits"]
+#FILENAME_PNG = cfgdata["Data"]["namepng"]
+DATA_DIR = cfgdata["Data"]["datadir"]
 
-NIGHT_EXP =  cfgdata["expos"]["night"]
-DAY_EXP =  cfgdata["expos"]["day"]
+NIGHT_EXP =  cfgdata["Expos"]["night"]
+DAY_EXP =  cfgdata["Expos"]["day"]

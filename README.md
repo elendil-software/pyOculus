@@ -1,7 +1,8 @@
 # pyOculus
-Python set up for Oculus allsky camera on Raspberry Pi. The code is currently running on an Starlight Xpress Oculus installed in the [Brecon Beacons National Park](http://www.breconbeacons.org/national-park-visitor-centre), in South Wales. More details about the installation are on my blog, [Dark Matter Sheep](http://darkmattersheep.uk/blog/brecon-allsky/).
+Python set up for Oculus allsky camera on Raspberry Pi. The code is currently running on an Starlight Xpress Oculus installed in the [Observatorio Astronómico de Javalambre](http://oajweb.cefca.es), in Teruel (Spain).
+This project is a fork of [https://github.com/zemogle/pyOculus](https://github.com/zemogle/pyOculus) Many thanks! [Dark Matter Sheep](http://darkmattersheep.uk/blog/).
 
-## Setup
+## Setup (Pending changes)
 - A Raspberry Pi
 - Need to install [INDI server](http://indilib.org/download/category/6-raspberry-pi.html) for Raspberry Pi.
 - Install Swig via `sudo apt-get install swig` you may need to do `sudo apt-get install -f` to get the dependencies
@@ -24,7 +25,7 @@ sudo make install
 
 You should already have `python` and `git` if you are using Raspbian.
 
-## Instructions
+## Instructions (Pending changes)
 The INDI server handles all the communication with the camera, so the server has to be running for this code to be able to talk to the camera. In my case Oculus uses a Starlight Xpress CCD, so I started the camera with:
 
 `indiserver -v -m 100 indi_sx_ccd`
@@ -35,7 +36,7 @@ This needs to be running when you do the next step, so open a new terminal (or i
 
 will save a file called `latest.fits` after taking an image.
 
-## Testing Setup
+## Testing Setup (Pending changes)
 
 If you are in doubt of whether the camera is connected and working, you can run the following test script (assuming the INDi server is running):
 

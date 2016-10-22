@@ -10,12 +10,10 @@ Observatory:
 
 ####### Config parameters
 Data:
-  FILENAME_FITS: 'latest.fits'
-  FILENAME_PNG: 'latest.png'
-  DATA_DIR: '/home/allskypi/images/'
+  datadir: '/home/pi/images/'
 
 Expos:
-  NIGHT_EXP: 45
-  DAY_EXP: 0.00001
+  night: 45
+  day: 0.0001
 
 

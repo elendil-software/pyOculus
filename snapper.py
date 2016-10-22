@@ -1,4 +1,4 @@
-try:
+try:		
     from indiclient import IndiClient
 except:
     print("INDiClient not installed")
@@ -13,13 +13,17 @@ import numpy
 from shutil import copyfile
 import time
 import json
-from astroplan import Observer
-from config import OBSERVATORY, FILENAME_FITS, FILENAME_PNG, DATA_DIR, DAY_EXP, NIGHT_EXP
+from astroplan import Observer, download_IERS_A
+from config import OBSERVATORY, DATA_DIR, DAY_EXP, NIGHT_EXP
+
+# TODO ponerle que si tiene internet, que baje actualizacion
+# Tambien que compruebe si es antigua
+#download_IERS_A()
 
 resp = None
 
 
-def take_exposure(exptime=DAY_EXP, filename=FILENAME_FITS):
+def take_exposure(exptime, filename):
     # instantiate the client
     indiclient=IndiClient(exptime, filename)
     # set indi server localhost and port 7624
@@ -51,12 +55,12 @@ def set_exposure(observatory, currenttime):
 
 
 def set_location():
-    lati = OBSERVATORY["lati"]
-    long = OBSERVATORY["long"]
+    lat = OBSERVATORY["lati"]
+    lon = OBSERVATORY["long"]
     elev = OBSERVATORY["elev"]
     name = OBSERVATORY["name"]
     timezone = OBSERVATORY["tizo"]
-    location = EarthLocation.from_geodetic(lati*u.deg, long*u.deg, elev*u.m)
+    location = EarthLocation.from_geodetic(lat*u.deg, lon*u.deg, elev*u.m)
     observatory = Observer(location=location, name=name, timezone=timezone)
     return observatory
 
@@ -68,7 +72,7 @@ def rise_set(observatory, currenttime):
     return (sunrise_tonight.datetime, sunset_tonight.datetime)
 
 
-def make_image(fitsfile=FILENAME_FITS, pngfile=FILENAME_PNG):
+def make_image(fitsfile, pngfile):
     '''
     Function to read in the FITS file from Oculus.
     - find the 99.5% value
@@ -109,7 +113,7 @@ if __name__ == '__main__':
         exp = set_exposure(observatory, currenttime)
         now = datetime.utcnow()
         datestamp = now.strftime("%Y%m%d-%H%M")
-        fitsfile = '%s%s' % (DATA_DIR, FILENAME_FITS)
+        fitsfile = '%s%s' % (DATA_DIR, "latest.fits")
         pngfile = '%s%s.png' % (DATA_DIR, datestamp)
         latestpng = '%slatest.png' % (DATA_DIR)
         resp = take_exposure(exptime=exp, filename=fitsfile)
