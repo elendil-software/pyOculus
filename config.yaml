@@ -8,12 +8,20 @@ Observatory:
   prss: 800
   tizo: "UTC"
 
-####### Config parameters
+####### Instrument parameters
+Instru:
+  name:  'Oculus'
+  id:    'allsky'
+
+####### Data config
 Data:
   datadir: '/home/pi/images/'
+  fitsdir: 'raw'
+  pngdir:  'png'
+  avidir:  '/home/pi/images/avi'
 
 Expos:
-  night: 45
+  night: 1
   day: 0.0001
 
 
