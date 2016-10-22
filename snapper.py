@@ -14,12 +14,8 @@ from shutil import copyfile
 import time
 import json
 from astroplan import Observer
+from config import OBSERVATORY, FILENAME_FITS, FILENAME_PNG, DATA_DIR, DAY_EXP, NIGHT_EXP
 
-FILENAME_FITS = 'latest.fits'
-FILENAME_PNG = 'latest.png'
-NIGHT_EXP  = 90
-DAY_EXP = 0.00001
-DATA_DIR = '/home/pi/images/'
 resp = None
 
 
@@ -39,8 +35,9 @@ def take_exposure(exptime=DAY_EXP, filename=FILENAME_FITS):
         time.sleep(1)
     return True
 
-def set_exposure(brecon, currenttime):
-    sunrise, sunset = rise_set(brecon, currenttime)
+
+def set_exposure(observatory, currenttime):
+    sunrise, sunset = rise_set(observatory, currenttime)
     exp = NIGHT_EXP
     print(sunrise, sunset, currenttime)
     if abs(sunrise - currenttime ) < timedelta(seconds=600) or abs(currenttime -sunset) < timedelta(seconds=600):
@@ -52,15 +49,22 @@ def set_exposure(brecon, currenttime):
     print("Setting exposure time to %s (%s)" % (exp, sunrise-sunset))
     return exp
 
-def setup():
-    location = EarthLocation.from_geodetic(-3.48902*u.deg, 51.9249*u.deg, 300*u.m)
-    brecon = Observer(location=location, name="Brecon", timezone="UTC")
-    return brecon
 
-def rise_set(brecon, currenttime):
+def set_location():
+    lati = OBSERVATORY["lati"]
+    long = OBSERVATORY["long"]
+    elev = OBSERVATORY["elev"]
+    name = OBSERVATORY["name"]
+    timezone = OBSERVATORY["tizo"]
+    location = EarthLocation.from_geodetic(lati*u.deg, long*u.deg, elev*u.m)
+    observatory = Observer(location=location, name=name, timezone=timezone)
+    return observatory
+
+
+def rise_set(observatory, currenttime):
     time = Time(currenttime)
-    sunset_tonight = brecon.sun_set_time(time, which='nearest')
-    sunrise_tonight = brecon.sun_rise_time(time, which='nearest')
+    sunset_tonight = observatory.sun_set_time(time, which='nearest')
+    sunrise_tonight = observatory.sun_rise_time(time, which='nearest')
     return (sunrise_tonight.datetime, sunset_tonight.datetime)
 
 
@@ -80,11 +84,12 @@ def make_image(fitsfile=FILENAME_FITS, pngfile=FILENAME_PNG):
     img_data = new_scaled.filled()
     result = Image.fromarray(img_data.astype(numpy.uint8))
     font = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 24)
-    textstamp = 'Brecon Beacons All Sky - %s' % datetime.now().strftime("%Y-%m-%d %H:%M")
+    textstamp = '%s All Sky - %s' % (OBSERVATORY["name"], datetime.now().strftime("%Y-%m-%d %H:%M"))
     draw = ImageDraw.Draw(result)
     draw.text((10, 10), textstamp, font=font, fill=255)
     result.save(pngfile)
     return
+
 
 def make_json(now=datetime.now()):
     nowtimestamp = datetime.strftime(now,"%a, %d %b %Y %H:%M:%S GMT+0000")
@@ -97,12 +102,11 @@ def make_json(now=datetime.now()):
     return
 
 
-
 if __name__ == '__main__':
-    brecon = setup()
+    observatory = set_location()
     currenttime = datetime.utcnow()
-    if brecon.is_night(currenttime):
-        exp = set_exposure(brecon, currenttime)
+    if observatory.is_night(currenttime):
+        exp = set_exposure(observatory, currenttime)
         now = datetime.utcnow()
         datestamp = now.strftime("%Y%m%d-%H%M")
         fitsfile = '%s%s' % (DATA_DIR, FILENAME_FITS)

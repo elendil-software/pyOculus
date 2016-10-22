@@ -1,0 +1,21 @@
+####### Observatory Location
+Observatory:
+  name: "OAJ"
+  lati: +40.0422222
+  long: -01.0163889
+  elev: 1957
+  temp: 5
+  prss: 800
+  tizo: "UTC"
+
+####### Config parameters
+Data:
+  FILENAME_FITS: 'latest.fits'
+  FILENAME_PNG: 'latest.png'
+  DATA_DIR: '/home/allskypi/images/'
+
+Expos:
+  NIGHT_EXP: 45
+  DAY_EXP: 0.00001
+
+
