@@ -5,7 +5,7 @@ USBdir="/media/pi/ALLSKY_USB"
 CAMERAid="ID 1278:0509 Starlight Xpress"
 
 # Check camera is plugged
-CAMplugged=`lsusb | grep -e "$CAMERA"`
+CAMplugged=`lsusb | grep -e "$CAMERAid"`
 
 USBplugged=''
 # Check USBdrive is plugged
