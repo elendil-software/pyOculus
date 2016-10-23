@@ -53,15 +53,18 @@ def take_exposure(exptime, filename):
 # Setting time exposure
 def set_exposure(observatory, currenttime):
 	sunrise, sunset = rise_set(observatory, currenttime)
-	exp = EXP_NIGHT
 	print(sunrise, sunset, currenttime)
-	if abs(sunrise - currenttime ) < timedelta(seconds=600) or abs(currenttime -sunset) < timedelta(seconds=600):
+	if observatory.is_night(currenttime):
+		if abs(sunrise - currenttime ) < timedelta(seconds=600) or abs(currenttime -sunset) < timedelta(seconds=600):
+			exp = EXP_DAY
+		elif abs(sunrise - currenttime) < timedelta(seconds=1800) or abs(currenttime -sunset) < timedelta(seconds=1800):
+			exp = EXP_NIGHT/10.
+		elif abs(sunrise - currenttime) < timedelta(seconds=5400) or (abs(currenttime -sunset) < timedelta(seconds=5400)):
+			exp = EXP_NIGHT/2.
+		print("Setting exposure time to %s (%s)" % (exp, sunrise-sunset))
+	else:
 		exp = EXP_DAY
-	elif abs(sunrise - currenttime) < timedelta(seconds=1800) or abs(currenttime -sunset) < timedelta(seconds=1800):
-		exp = EXP_NIGHT/10.
-	elif abs(sunrise - currenttime) < timedelta(seconds=5400) or (abs(currenttime -sunset) < timedelta(seconds=5400)):
-		exp = EXP_NIGHT/2.
-	print("Setting exposure time to %s (%s)" % (exp, sunrise-sunset))
+		
 	return exp
 
 
@@ -104,7 +107,7 @@ def make_image(parms, fitsfile, pngfile):
 	fontB = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 32)
 	fontS = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 24)
 	titletxt = '%s All Sky - %s' % (OBSERVATORY["name"], parms['night'])
-	timetxt = 'timestamp = %s' % (parms['utc'].strftime("%Y-%m-%d %H:%M"))
+	timetxt = 'timestamp = %s' % (parms['utc'].strftime("%Y-%m-%d %H:%M:%S"))
 	if parms['exp'] >= 1:
 		expotxt = 'exposure = %.0f s' % (parms['exp'])
 	else:

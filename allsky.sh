@@ -1,5 +1,6 @@
 #!/bin/bash
 
+PYTHONDIR="/home/pi/pyOculus/pyOculus/"
 USBdir="/media/pi/ALLSKY_USB"
 CAMERAid="ID 1278:0509 Starlight Xpress"
 
@@ -25,7 +26,8 @@ else
 	night=`date +%Y%m%d -d "-12 hour"`
 	
 	#source /home/pi/env/allsky/bin/activate
-	python /home/pi/pyOculus/pyOculus/snapper.py
+	cd $PYTHONDIR
+	python snapper.py
 	convert -quality 90% -resize 75% $datadir/tonight/latest.png $datadir/tonight/latest.jpg
 	#/usr/local/bin/s3cmd -c /home/pi/.s3cfg --no-progress sync images/*.jpg s3://www.zemogle.uk/allsky/
 	#/usr/local/bin/s3cmd -c /home/pi/.s3cfg --no-progress sync images/*.json s3://www.zemogle.uk/allsky/

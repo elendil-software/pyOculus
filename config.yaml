@@ -20,5 +20,5 @@ Data:
 
 Expos:
   night: 1
-  day: 0.0001
+  day: 0.05
 
