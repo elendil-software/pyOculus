@@ -1,7 +1,7 @@
 ####### Observatory Location
 Observatory:
   name: "OAJ"
-  lati: +40.0422222
+  lati: 40.0422222
   long: -01.0163889
   elev: 1957
   temp: 5
@@ -10,18 +10,15 @@ Observatory:
 
 ####### Instrument parameters
 Instru:
-  name:  'Oculus'
-  id:    'allsky'
+  name:   'StarXpress Oculus'
+  camera: 'SX CCD SuperStar'
+  id:     'allsky'
 
 ####### Data config
 Data:
-  datadir: '/home/pi/images/'
-  fitsdir: 'raw'
-  pngdir:  'png'
-  avidir:  '/home/pi/images/avi'
+  data_dir: '/home/pi/images'
 
 Expos:
   night: 1
   day: 0.0001
-
 

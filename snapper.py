@@ -1,9 +1,11 @@
+#!/usr/bin/python
+# -*- encoding: utf-8 -*-
+
 try:		
 	from indiclient import IndiClient
 except:
 	print("INDiClient not installed")
 import sys, os
-import time
 from datetime import datetime, timedelta
 from PIL import Image, ImageFont, ImageDraw
 from astropy.io import fits
@@ -15,9 +17,9 @@ from shutil import copyfile
 import time
 import json
 from astroplan import Observer, download_IERS_A
-from config import OBSERVATORY, INSTRU, DATA_DIR, DAY_EXP, NIGHT_EXP
+from config import OBSERVATORY, INSTRU, DATA_DIR, EXP_DAY, EXP_NIGHT
 
-# TODO ponerle que si tiene internet, que baje actualizacion
+# TODO: ponerle que si tiene internet, que baje actualizacion
 # Tambien que compruebe si es antigua
 #download_IERS_A()
 
@@ -50,14 +52,14 @@ def take_exposure(exptime, filename):
 
 def set_exposure(observatory, currenttime):
 	sunrise, sunset = rise_set(observatory, currenttime)
-	exp = NIGHT_EXP
+	exp = EXP_NIGHT
 	print(sunrise, sunset, currenttime)
 	if abs(sunrise - currenttime ) < timedelta(seconds=600) or abs(currenttime -sunset) < timedelta(seconds=600):
-		exp = DAY_EXP
+		exp = EXP_DAY
 	elif abs(sunrise - currenttime) < timedelta(seconds=1800) or abs(currenttime -sunset) < timedelta(seconds=1800):
-		exp = NIGHT_EXP/10.
+		exp = EXP_NIGHT/10.
 	elif abs(sunrise - currenttime) < timedelta(seconds=5400) or (abs(currenttime -sunset) < timedelta(seconds=5400)):
-		exp = NIGHT_EXP/2.
+		exp = EXP_NIGHT/2.
 	print("Setting exposure time to %s (%s)" % (exp, sunrise-sunset))
 	return exp
 
@@ -80,7 +82,7 @@ def rise_set(observatory, currenttime):
 	return (sunrise_tonight.datetime, sunset_tonight.datetime)
 
 
-def make_image(exp, fitsfile, pngfile):
+def make_image(parms, fitsfile, pngfile):
 	'''
 	Function to read in the FITS file from Oculus.
 	- find the 99.5% value
@@ -95,16 +97,19 @@ def make_image(exp, fitsfile, pngfile):
 	new_scaled.fill_value=255.
 	img_data = new_scaled.filled()
 	result = Image.fromarray(img_data.astype(numpy.uint8))
-	font = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 24)
-	titlestamp = '%s All Sky - %s' % (OBSERVATORY["name"], datetime.now().strftime("%Y-%m-%d %H:%M"))
-	if exp > 1:
-		expostamp = 'exposure = %.0f s' % (exp)
+	fontB = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 32)
+	fontS = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 24)
+	titletxt = '%s All Sky - %s' % (OBSERVATORY["name"], parms['night'])
+	timetxt = 'timestamp = %s' % (parms['utc'].strftime("%Y-%m-%d %H:%M"))
+	if parms['exp'] >= 1:
+		expotxt = 'exposure = %.0f s' % (parms['exp'])
 	else:
-		expostamp = 'exposure = %.4f s' % (exp)
+		expotxt = 'exposure = %.4f s' % (parms['exp'])
 		
 	draw = ImageDraw.Draw(result)
-	draw.text((10, 10), titlestamp, font=font, fill=255)
-	draw.text((100, 10), expostamp, font=font, fill=255)
+	draw.text((10, 10), titletxt, font=fontB, fill=255)
+	draw.text((10, 60), timetxt, font=fontS, fill=255)
+	draw.text((10, 100), expotxt, font=fontS, fill=255)
 	result.save(pngfile)
 	return
 
@@ -121,28 +126,37 @@ def make_json(now=datetime.now()):
 
 
 if __name__ == '__main__':
+	
+	# Establishing exposure time
 	observatory = set_location()
 	currenttime = datetime.utcnow()
+	exp = set_exposure(observatory, currenttime)
+	# Which night?
 	currenthour = float(currenttime.strftime('%H'))+float(currenttime.strftime('%M'))/60.
 	if currenthour > 12:
 		night8 = currenttime.strftime('%Y%m%d')
 	else:
 		night8 = (currenttime - timedelta(1)).strftime('%Y%m%d')
-
-	if observatory.is_night(currenttime):
-		exp = set_exposure(observatory, currenttime)
-		now = datetime.utcnow()
-		datestamp = now.strftime("%Y%m%dT%H%M")
-		fitsfile = checkdir('%s/raw/%s/%s-%s.fits' % (DATA_DIR, night8, INSTRU, datestamp))
-		pngfile = checkdir('%s/png/%s/%s.png' % (DATA_DIR, night8, datestamp))
-		latestpng = checkdir('%s/tonight/latest.png' % (DATA_DIR))
-		resp = take_exposure(exptime=exp, filename=fitsfile)
-		if resp:
-			make_image(exp=exp, fitsfile=fitsfile, pngfile=pngfile)
-			copyfile(pngfile,latestpng)
-			#make_json(now)
-			print("Saved %s - %s" % (pngfile, datetime.utcnow().isoformat()))
-		else:
-			print("Error!")
+	# First, establishing filenames (reseting "now")
+	now = datetime.utcnow()
+	datestamp = now.strftime("%Y%m%dT%H%M")
+	fitsfile = checkdir('%s/raw/%s/%s-%s.fits' % (DATA_DIR, night8, INSTRU, datestamp))
+	pngfile = checkdir('%s/png/%s/%s.png' % (DATA_DIR, night8, datestamp))
+	latestpng = checkdir('%s/tonight/latest.png' % (DATA_DIR))
+	# Taking a image
+	resp = take_exposure(exptime=exp, filename=fitsfile)
+	# Creating other products from new fits
+	if resp:
+		parms = {
+		'night': night8,
+		'exp': exp,
+		'utc': now
+		}
+		make_image(parms=parms, fitsfile=fitsfile, pngfile=pngfile)
+		copyfile(pngfile, latestpng)
+		#make_json(now)
+		print("Saved %s - %s" % (pngfile, datetime.utcnow().isoformat()))
 	else:
-		print("Currently day - %s" % datetime.utcnow().isoformat())
+		print("Error!")
+	
+	sys.exit()
