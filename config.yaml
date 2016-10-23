@@ -16,7 +16,7 @@ Instru:
 
 ####### Data config
 Data:
-  data_dir: '/home/pi/images'
+  data_dir: '/media/pi/ALLSKY_USB/data/oaj/allsky'
 
 Expos:
   night: 1
