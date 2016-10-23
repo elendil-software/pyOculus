@@ -33,6 +33,7 @@ def checkdir(filename):
 	return filename
 
 
+# Take image through INDI
 def take_exposure(exptime, filename):
 	# instantiate the client
 	indiclient=IndiClient(exptime, filename)
@@ -43,13 +44,13 @@ def take_exposure(exptime, filename):
 		 print("No indiserver running on "+indiclient.getHost()+":"+str(indiclient.getPort())+" - Try to run")
 		 return False
 	time.sleep(1)
-
 	# start endless loop, client works asynchron in background, loop stops after disconnect
 	while indiclient.connected:
-		time.sleep(1)
+		time.sleep(0.3)
 	return True
 
 
+# Setting time exposure
 def set_exposure(observatory, currenttime):
 	sunrise, sunset = rise_set(observatory, currenttime)
 	exp = EXP_NIGHT
@@ -64,6 +65,7 @@ def set_exposure(observatory, currenttime):
 	return exp
 
 
+# Setting Observatory
 def set_location():
 	lat = OBSERVATORY["lati"]
 	lon = OBSERVATORY["long"]
@@ -75,6 +77,7 @@ def set_location():
 	return observatory
 
 
+# Sunset, Sunrise
 def rise_set(observatory, currenttime):
 	time = Time(currenttime)
 	sunset_tonight = observatory.sun_set_time(time, which='nearest')
@@ -82,6 +85,7 @@ def rise_set(observatory, currenttime):
 	return (sunrise_tonight.datetime, sunset_tonight.datetime)
 
 
+# Creating PNG images
 def make_image(parms, fitsfile, pngfile):
 	'''
 	Function to read in the FITS file from Oculus.
@@ -113,18 +117,22 @@ def make_image(parms, fitsfile, pngfile):
 	result.save(pngfile)
 	return
 
-
-def make_json(now=datetime.now()):
-	nowtimestamp = datetime.strftime(now,"%a, %d %b %Y %H:%M:%S GMT+0000")
-	latestdata = {'time' : nowtimestamp}
+# Creating JSON file
+def make_json(parms):
+	latestdata = {
+	'night': parms['night'],
+	'time' : parms['utc'].strftime("%a, %d %b %Y %H:%M:%S GMT+0000"),
+	'expo' : parms['exp']
+	}
 	latestjson = json.dumps(latestdata)
-	filename = '%slatest.json' % (DATA_DIR)
+	filename = '%s/tonight/latest.json' % (DATA_DIR)
 	f = open(filename,'wb')
 	f.write(latestjson)
 	f.close()
 	return
 
 
+# MAIN ###################################
 if __name__ == '__main__':
 	
 	# Establishing exposure time
@@ -154,7 +162,7 @@ if __name__ == '__main__':
 		}
 		make_image(parms=parms, fitsfile=fitsfile, pngfile=pngfile)
 		copyfile(pngfile, latestpng)
-		#make_json(now)
+		make_json(parms)
 		print("Saved %s - %s" % (pngfile, datetime.utcnow().isoformat()))
 	else:
 		print("Error!")
