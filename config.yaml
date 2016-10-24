@@ -10,15 +10,12 @@ Observatory:
 
 ####### Instrument parameters
 Instru:
-  name:   'StarXpress Oculus'
+  name:   'Starlight Xpress AllSk Oculus'   # Name
   camera: 'SX CCD SuperStar'
-  id:     'allsky'
-
-####### Data config
-Data:
-  data_dir: '/media/pi/ALLSKY_USB/data/oaj/allsky'
-
-Expos:
-  night: 1
-  day: 0.05
-
+  usbtag: 'Starlight Xpress'   
+  id:     'allsky'              # UPAD id
+  data_dir: '/mnt/ALLSKY_USB/data/oaj/allsky'
+  expo_night: 1                 #time exposure in seconds
+  expo_day: 0.05                #time exposure in seconds
+  sundt: 30                     # delay of time before/after sunset/sunrise
+ 

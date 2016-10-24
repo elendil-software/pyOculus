@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PYTHONDIR="/home/pi/pyOculus/pyOculus/"
-USBdir="/media/pi/ALLSKY_USB"
+USBdir="/mnt/ALLSKY_USB"
 CAMERAid="ID 1278:0509 Starlight Xpress"
 
 # Check camera is plugged
