@@ -1,9 +1,10 @@
 import numpy
+from gc import collect
 from astropy.io import fits
 from PIL import Image, ImageFont, ImageDraw
 import json
 
-# Creating PNG images
+# Creating PNG imagesipython
 def make_image(parms, fitsfile, pngfile):
 	'''
 	Function to read in the FITS file from Oculus.
@@ -33,6 +34,8 @@ def make_image(parms, fitsfile, pngfile):
 	draw.text((10, 60), timetxt, font=fontS, fill=255)
 	draw.text((10, 100), expotxt, font=fontS, fill=255)
 	result.save(pngfile)
+	draw = None
+	collect()	#  release memory with Gargabe Collector.
 	return
 
 # Creating JSON file
@@ -46,4 +49,5 @@ def make_json(parms, jasonfile):
 	f = open(jasonfile,'wb')
 	f.write(latestjson)
 	f.close()
+	collect()	#  release memory with Gargabe Collector.
 	return

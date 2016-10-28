@@ -16,14 +16,26 @@ import time
 from astroplan import Observer, download_IERS_A
 
 # My libs
-from config import OBSERVATORY, INSTR_ID, INSTR_TAG, DATA_DIR, EXP_DAY, EXP_NIGHT, SUNDT
+from config import OBSERVATORY, INSTR_ID, INSTR_TAG, DATA_DIR, EXP_DAY, EXP_NIGHT, SUNDT, SHOK
 import outputs
 import check
+
+if SHOK == "yes":
+	from sense_hat import SenseHat
+	from random import randint
+	sensehat = SenseHat()
 
 # TODO: ponerle que si tiene internet, que baje actualizacion
 # Tambien que compruebe si es antigua
 #download_IERS_A()
 
+def shscreen(value):
+	if SHOK == "yes":
+		if value == True:
+			sensehat.set_pixel(randint(0,7),randint(0,7),255,255,255)
+		if value == False:
+			sensehat.clear()
+	
 
 # Take image through INDI
 def take_exposure(exptime, filename):
@@ -151,7 +163,10 @@ if __name__ == '__main__':
 		# Check currenttime in range to observe
 		if currenttime >= (sunset - timedelta(minutes = SUNDT)) or \
 		currenttime <= (sunrise + timedelta(minutes = SUNDT)):
+			shscreen(True)
 			itsOk = loop(observatory, currenttime, night8)
+			shscreen(False)
+			#TODO: grabar un fichero status.
 			pass
 		
 		elif currenttime < (sunset - timedelta(minutes = SUNDT)):

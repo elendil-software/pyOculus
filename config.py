@@ -13,5 +13,7 @@ EXP_NIGHT =	cfgdata["Instru"]["expo_night"]
 EXP_DAY =  	cfgdata["Instru"]["expo_day"]
 SUNDT = 	cfgdata["Instru"]["sundt"]
 
+# SenseHat present?
+SHOK = "yes"
 
 

@@ -15,7 +15,7 @@ Instru:
   usbtag: 'Starlight Xpress'   
   id:     'allsky'              # UPAD id
   data_dir: '/mnt/ALLSKY_USB/data/oaj/allsky'
-  expo_night: 1                 #time exposure in seconds
-  expo_day: 0.05                #time exposure in seconds
+  expo_night: 2                 #time exposure in seconds
+  expo_day: 0.1                #time exposure in seconds
   sundt: 30                     # delay of time before/after sunset/sunrise
  
