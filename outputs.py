@@ -1,5 +1,4 @@
 import numpy
-from gc import collect
 from astropy.io import fits
 from PIL import Image, ImageFont, ImageDraw
 import json
@@ -34,20 +33,21 @@ def make_image(parms, fitsfile, pngfile):
 	draw.text((10, 60), timetxt, font=fontS, fill=255)
 	draw.text((10, 100), expotxt, font=fontS, fill=255)
 	result.save(pngfile)
-	draw = None
-	collect()	#  release memory with Gargabe Collector.
+	del fontB, fontS, titletxt, timetxt, expotxt
+	del data, scaled, new_scaled, max_val
+	del img_data, result, draw
 	return
 
 # Creating JSON file
-def make_json(parms, jasonfile):
+def make_json(parms, jsonfile):
 	latestdata = {
 	'night': parms['night'],
 	'time' : parms['utc'].strftime("%a, %d %b %Y %H:%M:%S GMT+0000"),
 	'expo' : parms['exp']
 	}
 	latestjson = json.dumps(latestdata)
-	f = open(jasonfile,'wb')
+	f = open(jsonfile,'wb')
 	f.write(latestjson)
 	f.close()
-	collect()	#  release memory with Gargabe Collector.
+	del f, latestjson, latestdata
 	return
