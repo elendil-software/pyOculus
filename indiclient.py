@@ -74,5 +74,4 @@ class IndiClient(PyIndi.BaseClient):
         # send new exposure time to server/device
         self.sendNewNumber(exp)
 
-logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
-
+#logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)

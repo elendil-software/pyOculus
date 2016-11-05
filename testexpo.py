@@ -12,11 +12,11 @@ exptime=2
 filename="hola.fits"
 i = 0
 collect()
+indiclient=IndiClient(exptime, filename)
 
-while i< 10:
+while i< 1:
 	i +=1
 	print i
-	indiclient=IndiClient(exptime, filename)
 	# set indi server localhost and port 7624
 	indiclient.setServer("localhost",7624)
 	if (not(indiclient.connectServer())):

@@ -1,56 +1,63 @@
 #!/usr/bin/python
 # -*- encoding: utf-8 -*-
 
+## pyOculus version Miguel Chioare / mchioare ¿at? cefca.es
+## source from: https://github.com/arritrancos/pyOculus
+
+## Many thanks to zemogle to develop first version: https://github.com/zemogle/pyOculus
+
+##BORRAME. Es para pruebas.
+def timeimport(lib):
+	print( "%30s %30s" % (lib, datetime.utcnow()))
+
 try:		
 	from indiclient import IndiClient
 except:
 	print("INDiClient not installed")
 
 import sys
+from time import sleep
 from datetime import datetime, timedelta
-from astropy.coordinates import EarthLocation
-from astropy.time import Time
-import astropy.units as u
 from shutil import copyfile
-import time
-from astroplan import Observer, download_IERS_A
+
+timeimport("principio")
 
 # My libs
-from config import OBSERVATORY, INSTR_ID, INSTR_TAG, DATA_DIR, EXP_DAY, EXP_NIGHT, SUNDT, SHOK
+from config import OBSERVATORY, INSTR_ID, INSTR_TAG, DATA_DIR, EXP_DAY, EXP_NIGHT, SUNDT, SHMOD
 import outputs
 import check
+from common import set_location, get_riseset, get_night, get_memory
 
-if SHOK == "yes":
+timeimport("mylibs")
+
+# To use SenseHat modul if you like (able on config.yaml)
+if SHMOD == True:
 	from sense_hat import SenseHat
 	from random import randint
 	sensehat = SenseHat()
 	sensehat.low_light = True
 	shpos = (randint(0,7), randint(0,7))
 
-# TODO: ponerle que si tiene internet, que baje actualizacion
-# Tambien que compruebe si es antigua
-#download_IERS_A()
-
 def shscreen(value, shpos):
-	if SHOK == "yes":
+	if SHMOD == True:
 		if value == "ini":
+			# led moving every exposure into the screen
 			shpos = ((shpos[0]+1) % 8, (shpos[1]+1) % 8)
 			sensehat.set_pixel(shpos[0],shpos[1],0,0,255)
-			time.sleep(0.1)
+			sleep(0.1)
 			sensehat.clear()
 		elif value == "exp":
-			sensehat.set_pixel(shpos[0],shpos[1],0,0,255)
+			sensehat.set_pixel(shpos[0],shpos[1],0,0,255) # Blue
 		elif value == "dld":
-			sensehat.set_pixel(shpos[0],shpos[1],0,255,0)
+			sensehat.set_pixel(shpos[0],shpos[1],0,255,0) # Green
 		elif value == "day":
-			sensehat.show_letter("d",text_colour=(255,255,0))
-			time.sleep(5)
+			sensehat.show_letter("d",text_colour=(255,255,0)) # Yellow
+			sleep(5)
 			sensehat.clear()
 		elif value == False:
 			sensehat.clear()
 		else:
 			sensehat.clear()
-	
 	return shpos
 	
 
@@ -64,10 +71,10 @@ def take_exposure(exptime, filename):
 	if (not(indiclient.connectServer())):
 		 print("No indiserver running on "+indiclient.getHost()+":"+str(indiclient.getPort())+" - Try to run")
 		 return False
-	time.sleep(1)
+	sleep(1)
 	# start endless loop, client works asynchron in background, loop stops after disconnect
 	while indiclient.connected:
-		time.sleep(0.3)
+		sleep(0.3)
 	indiclient.disconnectServer()
 	del indiclient
 	return True
@@ -75,61 +82,33 @@ def take_exposure(exptime, filename):
 
 # Setting time exposure
 def set_exposure(observatory, currenttime):
-	sunrise, sunset = rise_set(observatory, currenttime)
+	sunrise, sunset = get_riseset(observatory, currenttime)
 	#print(sunrise, sunset, currenttime)
 	if observatory.is_night(currenttime):
 		if abs(sunrise - currenttime ) < timedelta(seconds=600) or abs(currenttime -sunset) < timedelta(seconds=600):
 			exp = EXP_DAY
+			info = "too bright yet."
 		elif abs(sunrise - currenttime) < timedelta(seconds=1800) or abs(currenttime -sunset) < timedelta(seconds=1800):
 			exp = EXP_NIGHT/10.
+			info = "no enough dark yet"
 		elif abs(sunrise - currenttime) < timedelta(seconds=5400) or (abs(currenttime -sunset) < timedelta(seconds=5400)):
 			exp = EXP_NIGHT/2.
+			info = "bit dark!"
 		else:
 			exp = EXP_NIGHT
+			info = "dark expo"
 	else:
 		exp = EXP_DAY
-	print("Setting exposure time to %s (%s)" % (exp, sunrise-sunset))
+		info = "sun is up!"
+	print("Setting exposure time to %s (%s)" % (exp, info))
 	del sunrise, sunset, observatory, currenttime
 	return exp
 
 
-# Setting Observatory
-def set_location():
-	lat = OBSERVATORY["lati"]
-	lon = OBSERVATORY["long"]
-	elev = OBSERVATORY["elev"]
-	name = OBSERVATORY["name"]
-	timezone = OBSERVATORY["tizo"]
-	location = EarthLocation.from_geodetic(lon*u.deg+180*u.deg, lat*u.deg, elev*u.m)
-	observatory = Observer(location=location, name=name, timezone=timezone)
-	return observatory
-
-
-# Sunset, Sunrise
-def rise_set(observatory, currenttime):
-	time = Time(currenttime)
-	sunset_tonight = observatory.sun_set_time(time, which='nearest')
-	sunrise_tonight = observatory.sun_rise_time(time, which='nearest')
-	return (sunrise_tonight.datetime, sunset_tonight.datetime)
-
-
-# Which night? Change on every midday
-def night(currenttime):
-	currenthour = float(currenttime.strftime('%H'))+float(currenttime.strftime('%M'))/60.
-	if currenthour > 12:
-		night8 = currenttime.strftime('%Y%m%d')
-	else:
-		night8 = (currenttime - timedelta(1)).strftime('%Y%m%d')
-	del currenttime
-	return night8
-
-
-# Loop whole night
-def loop(observatory, currenttime, night8):
-	resp = None
-	itsOk = False
-	exp = set_exposure(observatory, currenttime)
+def main_images(observatory, night8):
+	# Preparing exposure	
 	now = datetime.utcnow()
+	exp = set_exposure(observatory, now)
 	datestamp = now.strftime("%Y%m%dT%H%M%S")
 	# Taking a image
 	fitsfile = check.check_dir('%s/raw/%s/%s-%s.fits' % (DATA_DIR, night8, INSTR_ID, datestamp))
@@ -137,7 +116,7 @@ def loop(observatory, currenttime, night8):
 	# Creating other products from new fits
 	if resp:
 		parms = {
-		'observatory': OBSERVATORY["name"],
+		'observatory': observatory.name,
 		'night': night8,
 		'exp': exp,
 		'utc': now
@@ -151,13 +130,8 @@ def loop(observatory, currenttime, night8):
 		jsonfile = check.check_dir('%s/tonight/latest.json' % (DATA_DIR))
 		outputs.make_json(parms, jsonfile)
 		print("Saved %s - %s" % (pngfile, datetime.utcnow().isoformat()))
-		itsOk = True
 	else:
 		print("Error!")
-		itsOk = False
-	del fitsfile, jsonfile, pngfile, latestpng
-	del resp
-	return itsOk
 
 
 # MAIN ###################################
@@ -165,45 +139,21 @@ if __name__ == '__main__':
 	
 	observatory = set_location()
 	currenttime = datetime.utcnow()
-	sunrise, sunset = rise_set(observatory, currenttime)
-	night8 = night(currenttime)
+	night8 = get_night(currenttime)
 	
-	# Somethings to check
-	test = {
-	'datadir': DATA_DIR,
-	'usbtag': INSTR_TAG
-	}
+	try:
+		if sys.argv[1] == "loop":
+			mymem = get_memory()
+			i = 1
+			# leak memory on driver? it doesn't release ~3MB every iteration
+			while mymem['used'] < mymem['free'] or mymem['free'] < 0.25*mymem['total']:
+				print("taking a loop of images (%s, %.0f < %.0f)..." % (str(i).zfill(3), mymem['used'], mymem['free']))
+				main_images(observatory, night8)
+				mymem = get_memory()
+				i +=1
+			
+	except:
+		print("taking one image...")
+		main_images(observatory, night8)
 	
-	itsOk = True
-	i = 0
-	while itsOk == True:
-		i += 1
-		if i > 10:
-			itsOk = False
-		shpos=shscreen("ini",shpos)
-		# Check prerequisities.
-		itsOk, reasons = check.check_prev(test)
-		if not itsOk:
-			print("ERROR: %s" % " ".join(reasons))
-			break
-		
-		# Check currenttime in range to observe
-		if currenttime >= (sunset - timedelta(minutes = SUNDT)) or \
-		currenttime <= (sunrise + timedelta(minutes = SUNDT)):
-			shpos=shscreen("exp",shpos)
-			itsOk = loop(observatory, currenttime, night8)
-			shpos=shscreen("dld",shpos)
-			#TODO: grabar un fichero status.
-			pass
-		
-		elif currenttime < (sunset - timedelta(minutes = SUNDT)):
-			print("Nope yet. Wait.")
-			shpos=shscreen("day",shpos)
-			time.sleep(60)
-			pass
-		
-		else:
-			print("Observation finished!")
-			itsOk = False
-				
-	sys.exit()
+	sys.exit()	

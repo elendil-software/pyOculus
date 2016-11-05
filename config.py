@@ -14,6 +14,6 @@ EXP_DAY =  	cfgdata["Instru"]["expo_day"]
 SUNDT = 	cfgdata["Instru"]["sundt"]
 
 # SenseHat present?
-SHOK = "yes"
+SHMOD = True
 
 
