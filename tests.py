@@ -29,3 +29,4 @@ class TestCalculations:
         now = datetime(2016,4,6,19,20)
         exposure = set_exposure(observatory, now)
         assert exposure == EXP_NIGHT/10.
+

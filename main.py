@@ -6,10 +6,6 @@
 
 ## Many thanks to zemogle to develop first version: https://github.com/zemogle/pyOculus
 
-##BORRAME. Es para pruebas.
-def timeimport(lib):
-	print( "%30s %30s" % (lib, datetime.utcnow()))
-
 try:		
 	from indiclient import IndiClient
 except:
@@ -20,47 +16,13 @@ from time import sleep
 from datetime import datetime, timedelta
 from shutil import copyfile
 
-timeimport("principio")
-
 # My libs
-from config import OBSERVATORY, INSTR_ID, INSTR_TAG, DATA_DIR, EXP_DAY, EXP_NIGHT, SUNDT, SHMOD
+from config import logger
+from config import OBSERVATORY, INSTR_ID, INSTR_TAG, DATA_DIR, EXP_DAY, EXP_NIGHT, SUNDT, SHMOD, MEMFREEMIN
 import outputs
 import check
 from common import set_location, get_riseset, get_night, get_memory
-
-timeimport("mylibs")
-
-# To use SenseHat modul if you like (able on config.yaml)
-if SHMOD == True:
-	from sense_hat import SenseHat
-	from random import randint
-	sensehat = SenseHat()
-	sensehat.low_light = True
-	shpos = (randint(0,7), randint(0,7))
-
-def shscreen(value, shpos):
-	if SHMOD == True:
-		if value == "ini":
-			# led moving every exposure into the screen
-			shpos = ((shpos[0]+1) % 8, (shpos[1]+1) % 8)
-			sensehat.set_pixel(shpos[0],shpos[1],0,0,255)
-			sleep(0.1)
-			sensehat.clear()
-		elif value == "exp":
-			sensehat.set_pixel(shpos[0],shpos[1],0,0,255) # Blue
-		elif value == "dld":
-			sensehat.set_pixel(shpos[0],shpos[1],0,255,0) # Green
-		elif value == "day":
-			sensehat.show_letter("d",text_colour=(255,255,0)) # Yellow
-			sleep(5)
-			sensehat.clear()
-		elif value == False:
-			sensehat.clear()
-		else:
-			sensehat.clear()
-	return shpos
 	
-
 # Take image through INDI
 def take_exposure(exptime, filename):
 	# instantiate the client
@@ -100,7 +62,7 @@ def set_exposure(observatory, currenttime):
 	else:
 		exp = EXP_DAY
 		info = "sun is up!"
-	print("Setting exposure time to %s (%s)" % (exp, info))
+	logger.info("Setting exposure time to %s (%s)" % (exp, info))
 	del sunrise, sunset, observatory, currenttime
 	return exp
 
@@ -129,10 +91,10 @@ def main_images(observatory, night8):
 		# Make Jasonfile
 		jsonfile = check.check_dir('%s/tonight/latest.json' % (DATA_DIR))
 		outputs.make_json(parms, jsonfile)
-		print("Saved %s - %s" % (pngfile, datetime.utcnow().isoformat()))
+		logger.info("Saved %s - %s" % (pngfile, datetime.utcnow().isoformat()))
 	else:
-		print("Error!")
-
+		logger.critical("Error!")
+	
 
 # MAIN ###################################
 if __name__ == '__main__':
@@ -143,17 +105,18 @@ if __name__ == '__main__':
 	
 	try:
 		if sys.argv[1] == "loop":
+			logger.debug("Entering loop on MAIN")
 			mymem = get_memory()
 			i = 1
 			# leak memory on driver? it doesn't release ~3MB every iteration
-			while mymem['used'] < mymem['free'] or mymem['free'] < 0.25*mymem['total']:
-				print("taking a loop of images (%s, %.0f < %.0f)..." % (str(i).zfill(3), mymem['used'], mymem['free']))
+			while mymem['used'] < MEMFREEMIN*mymem['total']:
+				logger.debug("taking a loop of images (%s) until %.1f%% < %.0f%% ." % \
+					(str(i).zfill(3), 100.*mymem['used']/mymem['total'], 100*MEMFREEMIN))
 				main_images(observatory, night8)
 				mymem = get_memory()
 				i +=1
-			
+		
 	except:
 		print("taking one image...")
 		main_images(observatory, night8)
-	
-	sys.exit()	
+

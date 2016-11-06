@@ -1,3 +1,9 @@
+####### Basic config
+Basic:
+  memfree: 0.50   # ratio minimum free memory to do a loop. (1=totally mem used)
+  sensehat: True  # enable SenseHat hardware module	[True/False]
+  loglevel: "DEBUG"
+
 ####### Observatory Location
 Observatory:
   name: "OAJ"
@@ -10,12 +16,11 @@ Observatory:
 
 ####### Instrument parameters
 Instru:
-  name:   'Starlight Xpress AllSk Oculus'   # Name
-  camera: 'SX CCD SuperStar'
-  usbtag: 'Starlight Xpress'   
-  id:     'allsky'              # UPAD id
-  data_dir: '/mnt/ALLSKY_USB/data/oaj/allsky'
-  expo_night: 2                 #time exposure in seconds
-  expo_day: 0.1                #time exposure in seconds
-  sundt: 30                     # delay of time before/after sunset/sunrise
- 
+  name:      'Starlight Xpress AllSky Oculus'   # Name
+  camera:    'SX CCD SuperStar'     # To identify using INDI
+  usbtag:    'Starlight Xpress'     # To identify using lsusb command
+  id:        'allsky'               # prefix of images. UPAD id too (Only for OAJ/ceFca code)
+  expo_night: 10          # max time exposure (in seconds)
+  expo_day:   0.01        # min time exposure (in seconds)
+  sundt:      30         # time before/after sunset/sunrise to begin (in minutes)
+  data_dir:  '/mnt/ALLSKY_USB/data/oaj/allsky'  # Place to save data
