@@ -7,7 +7,6 @@
 ## Many thanks to zemogle to develop first version: https://github.com/zemogle/pyOculus
 
 import subprocess as sub
-
 from time import sleep
 from datetime import datetime, timedelta
 from shutil import copyfile
@@ -24,7 +23,7 @@ To use SenseHat Module to show progress
 '''
 if SHMOD == True:
 	from common import shvalue
-	shvalue("load")
+	shvalue("ini")
 
 
 def _set_exposure(when, tonight):
@@ -65,14 +64,12 @@ def _take_fits(texp, fitsfile):
 		return True it completes Ok.
 	'''
 	try:
-		if SHMOD == True:	shvalue("exp")
 		script = "%s/exposure.py" % (SCRIPTPATH)
 		command = [script, str(texp), str(fitsfile)]
 		logger.debug(" ".join(command))
 		p = sub.Popen(command,stdout=sub.PIPE,stderr=sub.PIPE)
 		output, errors = p.communicate()
 		#print output, errors
-		if SHMOD == True:	shvalue("dld")
 		return True
 	except:
 		return False
@@ -131,20 +128,21 @@ def do_obs_loop(tonight):
 		# Check enough space on disk (DATA_DIR, SPACEMIN)
 		check = check_space()
 		if not check == True:  
-			logger.critical(check)
+			logger.error(check)
 			loop = False
 			break
 		# Check enough memory (MEMFREEMIN)
 		check = check_memory()
 		if not check == True:  
-			logger.critical(check)
+			logger.error(check)
 			loop = False
 			break
 		# Check currenttime in range to observe
 		now = datetime.utcnow()
 		if now < (tonight.obsstart) or now > (tonight.obsend):
 			reason = "Out of period of observation. Exiting of loop"
-			logger.warning(reason)
+			logger.info(reason)
+			loop = reason
 			break
 		else:
 			if SHMOD == True:	shvalue("exp")
