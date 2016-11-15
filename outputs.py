@@ -3,6 +3,7 @@ from astropy.io import fits
 from PIL import Image, ImageFont, ImageDraw
 import json
 
+
 # Creating PNG imagesipython
 def make_image(parms, fitsfile, pngfile):
 	'''
@@ -37,6 +38,7 @@ def make_image(parms, fitsfile, pngfile):
 	del data, scaled, new_scaled, max_val
 	del img_data, result, draw
 	return
+
 
 # Creating JSON file
 def make_json(parms, jsonfile):

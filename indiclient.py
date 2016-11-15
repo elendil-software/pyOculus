@@ -1,13 +1,13 @@
-import sys, time, logging
+import logging
 import PyIndi
 
-DEVICE_NAME = "SX CCD SuperStar"
+#My config lib
+from config import INSTR_DEV
  
 class IndiClient(PyIndi.BaseClient):
-
     device = None
 
-    def __init__(self, exptime=10.0, filename="frame.fits", device=DEVICE_NAME):
+    def __init__(self, exptime=10.0, filename="frame.fits", device=INSTR_DEV):
         super(IndiClient, self).__init__()
         self.logger = logging.getLogger('PyQtIndi.IndiClient')
         self.logger.debug('creating an instance of PyQtIndi.IndiClient')
@@ -15,7 +15,7 @@ class IndiClient(PyIndi.BaseClient):
         self.filename = filename
         self.device = device
     def newDevice(self, d):
-        #self.logger.debug("new device " + d.getDeviceName())
+        self.logger.debug("new device " + d.getDeviceName())
         if d.getDeviceName() == self.device:
             self.logger.debug("Set new device %s!" % self.device)
             # save reference to the device in member variable
@@ -48,30 +48,36 @@ class IndiClient(PyIndi.BaseClient):
         # disconnect from server
         self.disconnectServer()
     def newSwitch(self, svp):
-        self.logger.info ("new Switch "+ svp.name.decode() + " for device "+ svp.device.decode())
+        #self.logger.info ("new Switch "+ svp.name.decode() + " for device "+ svp.device.decode())
+        pass
     def newNumber(self, nvp):
-        self.logger.debug("new Number "+ nvp.name.decode() + " for device "+ nvp.device.decode())
+        #self.logger.debug("new Number "+ nvp.name.decode() + " for device "+ nvp.device.decode())
+        pass
     def newText(self, tvp):
-        self.logger.debug("new Text "+ tvp.name.decode() + " for device "+ tvp.device.decode())
+        #self.logger.debug("new Text "+ tvp.name.decode() + " for device "+ tvp.device.decode())
+        pass
     def newLight(self, lvp):
-        self.logger.debug("new Light "+ lvp.name.decode() + " for device "+ lvp.device.decode())
+        #self.logger.debug("new Light "+ lvp.name.decode() + " for device "+ lvp.device.decode())
+        pass
     def newMessage(self, d, m):
         #self.logger.debug("new Message "+ d.messageQueue(m).decode())
         pass
     def serverConnected(self):
-        print("Server connected ("+self.getHost()+":"+str(self.getPort())+")")
-        self.connected = True
+		try:
+			self.connected = True
+			self.logger.debug("Server connected ("+self.getHost()+":"+str(self.getPort())+")")
+		except:
+			self.logger.critical("Server conection failed!")
     def serverDisconnected(self, code):
         self.logger.debug("Server disconnected (exit code = "+str(code)+","+str(self.getHost())+":"+str(self.getPort())+")")
         # set connected to False
         self.connected = False
     def takeExposure(self):
-        self.logger.debug("<<<<<<<< Exposure >>>>>>>>>")
+        self.logger.debug("> Exposure >>>>>>>>>")
         #get current exposure time
         exp = self.device.getNumber("CCD_EXPOSURE")
-        # set exposure time to 5 seconds
+        # set exposure time to x seconds
         exp[0].value = self.exptime
         # send new exposure time to server/device
         self.sendNewNumber(exp)
 
-#logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)

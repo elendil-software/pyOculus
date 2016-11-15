@@ -6,117 +6,190 @@
 
 ## Many thanks to zemogle to develop first version: https://github.com/zemogle/pyOculus
 
-try:		
-	from indiclient import IndiClient
-except:
-	print("INDiClient not installed")
+import subprocess as sub
 
-import sys
 from time import sleep
 from datetime import datetime, timedelta
 from shutil import copyfile
 
 # My libs
+from config import SCRIPTPATH, DATA_DIR, INSTR_ID, SHMOD, EXP_MAX, EXP_MIN
 from config import logger
-from config import OBSERVATORY, INSTR_ID, INSTR_TAG, DATA_DIR, EXP_DAY, EXP_NIGHT, SUNDT, SHMOD, MEMFREEMIN
+from common import Night, set_location
+from check import check_prev, check_dir, check_space, check_memory
 import outputs
-import check
-from common import set_location, get_riseset, get_night, get_memory
-	
-# Take image through INDI
-def take_exposure(exptime, filename):
-	# instantiate the client
-	indiclient=IndiClient(exptime, filename)
-	# set indi server localhost and port 7624
-	indiclient.setServer("localhost",7624)
-	# connect to indi server pause for 2 seconds
-	if (not(indiclient.connectServer())):
-		 print("No indiserver running on "+indiclient.getHost()+":"+str(indiclient.getPort())+" - Try to run")
-		 return False
-	sleep(1)
-	# start endless loop, client works asynchron in background, loop stops after disconnect
-	while indiclient.connected:
-		sleep(0.3)
-	indiclient.disconnectServer()
-	del indiclient
-	return True
+
+'''
+To use SenseHat Module to show progress
+'''
+if SHMOD == True:
+	from common import shvalue
+	shvalue("load")
 
 
-# Setting time exposure
-def set_exposure(observatory, currenttime):
-	sunrise, sunset = get_riseset(observatory, currenttime)
-	#print(sunrise, sunset, currenttime)
-	if observatory.is_night(currenttime):
-		if abs(sunrise - currenttime ) < timedelta(seconds=600) or abs(currenttime -sunset) < timedelta(seconds=600):
-			exp = EXP_DAY
+def _set_exposure(when, tonight):
+	'''
+	Setting time exposure
+		when: datetime to evaluate
+		tonight: Night object with properties to comare with now
+		return texp: time exposure in seconds
+	'''
+	if when > tonight.sunset:
+		if abs(tonight.sunrise - when ) < timedelta(seconds=600) or \
+		abs(when - tonight.sunset) < timedelta(seconds=600):
+			texp = EXP_MIN
 			info = "too bright yet."
-		elif abs(sunrise - currenttime) < timedelta(seconds=1800) or abs(currenttime -sunset) < timedelta(seconds=1800):
-			exp = EXP_NIGHT/10.
+		elif abs(tonight.sunrise - when) < timedelta(seconds=1800) or \
+		abs(when - tonight.sunset) < timedelta(seconds=1800):
+			texp = EXP_MAX/10.
 			info = "no enough dark yet"
-		elif abs(sunrise - currenttime) < timedelta(seconds=5400) or (abs(currenttime -sunset) < timedelta(seconds=5400)):
-			exp = EXP_NIGHT/2.
-			info = "bit dark!"
+		elif abs(tonight.sunrise - when) < timedelta(seconds=5400) or \
+		abs(now - tonight.sunset) < timedelta(seconds=5400):
+			texp = EXP_MAX/2.
+			info = "bit dark"
 		else:
-			exp = EXP_NIGHT
+			texp = EXP_MAX
 			info = "dark expo"
 	else:
-		exp = EXP_DAY
+		texp = EXP_MIN
 		info = "sun is up!"
-	logger.info("Setting exposure time to %s (%s)" % (exp, info))
-	del sunrise, sunset, observatory, currenttime
-	return exp
+	logger.debug("Setting exposure time to %s (%s)" % (texp, info))
+	return texp
 
 
-def main_images(observatory, night8):
-	# Preparing exposure	
+def _take_fits(texp, fitsfile):
+	'''
+	Take fits using exposure.py calling system with subprocess
+		texp: time exposure in seconds
+		fitsfile: filename with absolutepath to save image
+		return True it completes Ok.
+	'''
+	try:
+		if SHMOD == True:	shvalue("exp")
+		script = "%s/exposure.py" % (SCRIPTPATH)
+		command = [script, str(texp), str(fitsfile)]
+		logger.debug(" ".join(command))
+		p = sub.Popen(command,stdout=sub.PIPE,stderr=sub.PIPE)
+		output, errors = p.communicate()
+		#print output, errors
+		if SHMOD == True:	shvalue("dld")
+		return True
+	except:
+		return False
+
+
+def _take_images(tonight):
+	'''
+	Take an image and make diferents outputs: fits, png, json.
+		tonight: Night class with properties to complete images.
+		return True it completes Ok
+	'''
+	# Preparing exposure
 	now = datetime.utcnow()
-	exp = set_exposure(observatory, now)
+	texp = _set_exposure(now, tonight)
 	datestamp = now.strftime("%Y%m%dT%H%M%S")
+	# Check path
+	fitsfile = '%s/raw/%s/%s-%s.fits' % (DATA_DIR, tonight.night8, INSTR_ID, datestamp)
+	check = check_dir(fitsfile)
+	if not check == True: logger.critical(check)
 	# Taking a image
-	fitsfile = check.check_dir('%s/raw/%s/%s-%s.fits' % (DATA_DIR, night8, INSTR_ID, datestamp))
-	resp = take_exposure(exptime=exp, filename=fitsfile)
+	resp = _take_fits(texp, fitsfile)
 	# Creating other products from new fits
 	if resp:
 		parms = {
-		'observatory': observatory.name,
-		'night': night8,
-		'exp': exp,
+		'observatory': tonight.observatory,
+		'night': tonight.night8,
+		'exp': texp,
 		'utc': now
 		}
 		# Make PNG files
-		pngfile = check.check_dir('%s/png/%s/%s.png' % (DATA_DIR, night8, datestamp))
-		latestpng = check.check_dir('%s/tonight/latest.png' % (DATA_DIR))
+		pngfile = '%s/png/%s/%s.png' % (DATA_DIR, tonight.night8, datestamp)
+		check = check_dir(pngfile)
+		if not check == True: logger.critical(check)
+		latestpng = '%s/tonight/latest.png' % (DATA_DIR)
+		check = check_dir(latestpng)
+		if not check == True: logger.critical(check)
 		outputs.make_image(parms=parms, fitsfile=fitsfile, pngfile=pngfile)
+		logger.info("Saved %s" % (pngfile))
 		copyfile(pngfile, latestpng)
 		# Make Jasonfile
-		jsonfile = check.check_dir('%s/tonight/latest.json' % (DATA_DIR))
+		jsonfile = '%s/tonight/latest.json' % (DATA_DIR)
+		check = check_dir(jsonfile)
+		if not check == True: logger.critical(check)
 		outputs.make_json(parms, jsonfile)
-		logger.info("Saved %s - %s" % (pngfile, datetime.utcnow().isoformat()))
+		return True
 	else:
-		logger.critical("Error!")
+		logger.critical("Error when take fits image!")
+		return False
 	
+
+def do_obs_loop(tonight):
+	j = 0
+	loop = True
+	while loop == True or j < 9999:
+		j += 1
+		# Check enough space on disk (DATA_DIR, SPACEMIN)
+		check = check_space()
+		if not check == True:  
+			logger.critical(check)
+			loop = False
+			break
+		# Check enough memory (MEMFREEMIN)
+		check = check_memory()
+		if not check == True:  
+			logger.critical(check)
+			loop = False
+			break
+		# Check currenttime in range to observe
+		now = datetime.utcnow()
+		if now < (tonight.obsstart) or now > (tonight.obsend):
+			reason = "Out of period of observation. Exiting of loop"
+			logger.warning(reason)
+			break
+		else:
+			if SHMOD == True:	shvalue("exp")
+			logger.info("Taking image %i... " % (j))
+			_take_images(tonight)
+			if SHMOD == True:	shvalue("dld")
+	return loop
+
 
 # MAIN ###################################
 if __name__ == '__main__':
 	
+	if SHMOD == True: shvalue("ini")
+	logger.info(">>>>>>>> Begining" )
+	# Establishing and Calculating  
 	observatory = set_location()
-	currenttime = datetime.utcnow()
-	night8 = get_night(currenttime)
-	
-	try:
-		if sys.argv[1] == "loop":
-			logger.debug("Entering loop on MAIN")
-			mymem = get_memory()
-			i = 1
-			# leak memory on driver? it doesn't release ~3MB every iteration
-			while mymem['used'] < MEMFREEMIN*mymem['total']:
-				logger.debug("taking a loop of images (%s) until %.1f%% < %.0f%% ." % \
-					(str(i).zfill(3), 100.*mymem['used']/mymem['total'], 100*MEMFREEMIN))
-				main_images(observatory, night8)
-				mymem = get_memory()
-				i +=1
+	now = datetime.utcnow()
+	tonight = Night(observatory, now)
+
+	mainloop = True
+	i = 0
+	while mainloop == True or i < 9999:
+		i += 1
+		# Check prerequisities
+		check = check_prev()
+		if not check == True:
+			logger.critical(check)
+			mainloop = False
+			break
 		
-	except:
-		print("taking one image...")
-		main_images(observatory, night8)
+		# Check currenttime in range to observe
+		now = datetime.utcnow()
+		if now < tonight.obsstart:
+			wait = (tonigh.obsstart - now).seconds
+			logger.warning("Too early. Waiting %.0f minutes" % wait/60.)
+			if SHMOD == True: shvalue("day")
+			sleep(wait)
+			pass
+		
+		else:
+			# do images in a loop
+			check = do_obs_loop(tonight)
+			if not check == True:
+				logger.warning(check)
+				if SHMOD == True: shvalue("end")
+				mainloop = False
+				break
 

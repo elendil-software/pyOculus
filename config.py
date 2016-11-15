@@ -2,59 +2,56 @@ from os import getcwd
 from yaml import load
 import logging
 
+
+# getting path
+def _get_scriptpath():
+	return getcwd()	
+
 # reading config from yaml file
-def get_config(cfgpath):
+def _get_config(cfgpath):
 	cfgfile = '%s/config.yaml' % cfgpath
 	cfgdata = load(open(cfgfile, 'r'))
 	return cfgdata
 
 # logging config
-def set_logger(logpath, loglevel):
+def _set_logger(logfile, loglevel):
 	if loglevel == "DEBUG":
 		level = logging.DEBUG
 	elif loglevel == "INFO":
 		level = logging.INFO
 	else:
 		level = logging.WARNING
+
+	if logfile.startswith("./"):
+		logfile = "%s/%s" % (SCRIPTPATH, logfile)
 	
 	logging.basicConfig(\
 		level=level,\
-		filename="{0}/{1}.log".format(logpath, "amen.txt"),\
+		filename="{0}.log".format(logfile),\
 		format="%(asctime)s [%(levelname)-5.5s]  %(message)s"\
 		)
 	logger = logging.getLogger()
-	logger.info("Config loaded")
-	
-	'''
-	
-	logger = logging.getLogger()
-	# File log
-	fileHandler = logging.FileHandler("{0}/{1}.log".format(logpath, "amen.txt"))
-	fileHandler.setFormatter(logFormatter)
-	fileHandler.setLevel(logging.DEBUG)
-	logger.addHandler(fileHandler)
-	'''
-	# Console log
-	'''
-	consoleHandler = logging.StreamHandler()
-	#consoleHandler.setFormatter(logFormatter)
-	#consoleHandler.setLevel(logging.DEBUG)
-	logger.addHandler(consoleHandler)
-	'''
+	logger.debug("Logger initialised.")	
 	return logger
 
-scriptpath = getcwd()
 
-cfgdata = get_config(scriptpath)
-MEMFREEMIN= cfgdata["Basic"]["memfree"]
-SHMOD = 	cfgdata["Basic"]["sensehat"]
-OBSERVATORY = cfgdata["Observatory"]
-INSTR_TAG = cfgdata["Instru"]["usbtag"]
-INSTR_ID = 	cfgdata["Instru"]["id"]
-DATA_DIR = 	cfgdata["Instru"]["data_dir"]
-EXP_NIGHT =	cfgdata["Instru"]["expo_night"]
-EXP_DAY =  	cfgdata["Instru"]["expo_day"]
-SUNDT = 	cfgdata["Instru"]["sundt"]
+SCRIPTPATH = _get_scriptpath()
+_cfgdata = _get_config(SCRIPTPATH)
 
-logger = set_logger(scriptpath, cfgdata["Basic"]["loglevel"])
+MEMFREE =	_cfgdata["Basic"]["memfree"]
+SPACEFREE =	_cfgdata["Basic"]["spacefree"]
+SHMOD = 	_cfgdata["Basic"]["sensehat"]
+DATA_DIR = 	_cfgdata["Basic"]["data_dir"]
+
+OBSERVATORY=_cfgdata["Observatory"]
+
+INSTR_DEV = _cfgdata["Instru"]["device"]
+INSTR_TAG = _cfgdata["Instru"]["usbtag"]
+INSTR_ID = 	_cfgdata["Instru"]["id"]
+EXP_MAX =	_cfgdata["Instru"]["expo_max"]
+EXP_MIN =  	_cfgdata["Instru"]["expo_min"]
+SUNDT = 	_cfgdata["Instru"]["sundt"]
+
+logger = _set_logger( \
+	_cfgdata["Basic"]["logfile"], _cfgdata["Basic"]["loglevel"])
 
