@@ -130,6 +130,7 @@ def do_obs_loop(tonight):
 		# Check enough memory (MEMFREEMIN)
 		if not check_space() or not check_memory():
 			obsloop = False
+			shvalue("err")
 			break
 		# Check currenttime in range to observe
 		now = datetime.utcnow()
@@ -148,7 +149,7 @@ def do_obs_loop(tonight):
 			logger.info(info)
 			_take_images(tonight)
 			if SHMOD == True:
-				shvalue("dld")
+				shvalue("")
 			sleep(0.1)
 	
 	return obsloop
@@ -170,6 +171,7 @@ if __name__ == '__main__':
 		i += 1
 		# Check prerequisities
 		if not check_prev():
+			shvalue("err")
 			break
 		# Check currenttime in range to observe
 		now = datetime.utcnow()
@@ -185,7 +187,5 @@ if __name__ == '__main__':
 			if not do_obs_loop(tonight):
 				break
 				
-			
-
-	if SHMOD == True: shvalue("end")
+	if SHMOD == True: shvalue("fin")
 	# Fin
