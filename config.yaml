@@ -2,7 +2,6 @@
 Basic:
   memfree:   0.33  # min free memory ratio to do a loop. (1=totally mem used)
   spacefree: 0.10  # min free space ratio in directory,  (1=totally space used)
-  sensehat:  True  # enable SenseHat hardware module       [True/False]
   data_dir:  '/mnt/ALLSKY_USB/data/oaj/allsky'   # Place to save data
   loglevel:  'INFO'                             # DEBUG, INFO, WARNING
   logfile:   '/tmp/pyOculus.txt'                    # Logfile
@@ -26,4 +25,8 @@ Instru:
   expo_min:  0.5                    # min time exposure (in seconds)
   sundt:     30                     # time before/after sunset/sunrise to begin (in minutes)
 
+# SenseHat module
+SenseHat:
+  enable:  True  # enable SenseHat hardware module       [True/False]
+  ori:  270   # orientation SenseHat message          [degrees] 
 

@@ -52,7 +52,7 @@ def _set_exposure(when, tonight):
 	else:
 		texp = EXP_MIN
 		info = "sun is up!"
-	logger.debug("Setting exposure time to %s (%s)" % (texp, info))
+	logger.info("Setting exposure time to %s (%s)" % (texp, info))
 	return texp
 
 
@@ -117,39 +117,41 @@ def _take_images(tonight):
 		return True
 	else:
 		logger.critical("Error when take fits image!")
+		sleep(10)	# To ease ctrl+c
 		return False
 	
 
 def do_obs_loop(tonight):
 	j = 0
-	loop = True
-	while loop == True or j < 9999:
+	obsloop = True
+	while True or j < 9999:
 		j += 1
 		# Check enough space on disk (DATA_DIR, SPACEMIN)
-		check = check_space()
-		if not check == True:  
-			logger.error(check)
-			loop = False
-			break
 		# Check enough memory (MEMFREEMIN)
-		check = check_memory()
-		if not check == True:  
-			logger.error(check)
-			loop = False
+		if not check_space() or not check_memory():
+			obsloop = False
 			break
 		# Check currenttime in range to observe
 		now = datetime.utcnow()
 		if now < (tonight.obsstart) or now > (tonight.obsend):
 			reason = "Out of period of observation. Exiting of loop"
 			logger.info(reason)
-			loop = reason
+			sleep(1)
+			obsloop = False
 			break
 		else:
-			if SHMOD == True:	shvalue("exp")
-			logger.info("Taking image %i... " % (j))
+			if SHMOD == True:
+				shvalue("exp")
+			info = "Taking image %i... " % (j)
+			if j % 10 == 0 or j == 1: 
+				info += "(time end obs: %.1f hours)" % ((tonight.obsend - now).seconds/3600.)
+			logger.info(info)
 			_take_images(tonight)
-			if SHMOD == True:	shvalue("dld")
-	return loop
+			if SHMOD == True:
+				shvalue("dld")
+			sleep(0.1)
+	
+	return obsloop
 
 
 # MAIN ###################################
@@ -161,18 +163,14 @@ if __name__ == '__main__':
 	observatory = set_location()
 	now = datetime.utcnow()
 	tonight = Night(observatory, now)
-
-	mainloop = True
+	logger.info("start:%s, end:%s" % (tonight.obsstart, tonight.obsend) )
+	
 	i = 0
-	while mainloop == True or i < 9999:
+	while True or i < 9999:
 		i += 1
 		# Check prerequisities
-		check = check_prev()
-		if not check == True:
-			logger.critical(check)
-			mainloop = False
+		if not check_prev():
 			break
-		
 		# Check currenttime in range to observe
 		now = datetime.utcnow()
 		if now < tonight.obsstart:
@@ -184,10 +182,10 @@ if __name__ == '__main__':
 		
 		else:
 			# do images in a loop
-			check = do_obs_loop(tonight)
-			if not check == True:
-				logger.warning(check)
-				if SHMOD == True: shvalue("end")
-				mainloop = False
+			if not do_obs_loop(tonight):
 				break
+				
+			
 
+	if SHMOD == True: shvalue("end")
+	# Fin

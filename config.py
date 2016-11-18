@@ -40,9 +40,8 @@ _cfgdata = _get_config(SCRIPTPATH)
 
 MEMFREE =	_cfgdata["Basic"]["memfree"]
 SPACEFREE =	_cfgdata["Basic"]["spacefree"]
-SHMOD = 	_cfgdata["Basic"]["sensehat"]
-DATA_DIR = 	_cfgdata["Basic"]["data_dir"]
 
+DATA_DIR = 	_cfgdata["Basic"]["data_dir"]
 OBSERVATORY=_cfgdata["Observatory"]
 
 INSTR_DEV = _cfgdata["Instru"]["device"]
@@ -54,4 +53,8 @@ SUNDT = 	_cfgdata["Instru"]["sundt"]
 
 logger = _set_logger( \
 	_cfgdata["Basic"]["logfile"], _cfgdata["Basic"]["loglevel"])
+
+SHMOD = 	_cfgdata["SenseHat"]["enable"]
+SHORI = 	_cfgdata["SenseHat"]["ori"]
+
 

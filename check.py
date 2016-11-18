@@ -4,6 +4,7 @@ from subprocess import check_output
 import re
 
 from config import DATA_DIR, INSTR_TAG, MEMFREE, SPACEFREE
+from config import logger
 
 
 def _check_datadir(directory):
@@ -14,7 +15,8 @@ def _check_datadir(directory):
 	# Summary
 	if not mounted:
 		reason = "%s is not accesible." % (directory)
-		return reason
+		logger.critical(reason)
+		return False
 	else:
 		return True
 
@@ -40,7 +42,8 @@ def _check_usbplug(usbtag):
 	# Summary
 	if not plugged:
 		reason = "Camera is not plugged."
-		return reason
+		logger.critical(reason)
+		return False
 	else:
 		return True
 
@@ -59,7 +62,8 @@ def _check_indi():
 	# Summary
 	if not process:
 		reason = "indiserver is not running."
-		return reason
+		logger.error(reason)
+		return False
 	else:
 		return True
 	
@@ -74,13 +78,11 @@ def check_prev():
 		_check_usbplug(INSTR_TAG), \
 		_check_indi(), \
 		)
-	for test in tests:
-		if not test:
-			reasons += test
-	if reasons == "":
-		return True
+	
+	if False in tests:
+		return False
 	else:
-		return reasons
+		return True
 	
 
 def check_space():
@@ -95,27 +97,12 @@ def check_space():
 		freespace = False
 	else:
 		freespace = True
-		
 	if not freespace:
 		reason = "Out of space (ratio free:%.1f%%) in %s" % (ratio, DATA_DIR)
-		return reason
+		logger.warning(reason)
+		return False
 	else:
 		return True
-		
-
-def check_dir(filename):
-	'''
-	Create a dir if path's filename need it.
-	filename: filename with absolute path included.
-	'''
-	try:
-		directory = dirname(filename)
-		if not exists(directory):
-			makedirs(directory)
-		return True
-	except:
-		reason = "Fail creating directory %s" % (directory)
-		return reason
 
 
 def check_memory():
@@ -127,7 +114,8 @@ def check_memory():
 	if mymem['used'] > (1-MEMFREE)*mymem['total']:
 		reason = "Reaching memory limt (used: %.1f%% > %.1f%%)" % \
 			(100.*mymem['used']/mymem['total'], 100.*(1-MEMFREE))
-		return reason
+		logger.warning(reason)
+		return False
 	else:
 		return True
 
@@ -148,3 +136,20 @@ def _get_memory():
 		ret['free'] = tmp
 		ret['used'] = int(ret['total']) - int(ret['free'])
 	return ret
+
+
+def check_dir(filename):
+	'''
+	Create a dir if path's filename need it.
+	filename: filename with absolute path included.
+	'''
+	try:
+		directory = dirname(filename)
+		if not exists(directory):
+			makedirs(directory)
+		return True
+	except:
+		reason = "Fail creating directory %s" % (directory)
+		logger.error(reason)
+		return False
+		
