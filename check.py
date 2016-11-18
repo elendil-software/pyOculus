@@ -89,16 +89,16 @@ def check_space():
 	'''
 	Check space on disk. Thanks StackOverFlow
 	'''
-	statv = statvfs(DATA_DIR)
-	total = float(statv.f_frsize * statv.f_blocks)  # Size of filesystem in bytes
-	free = float(statv.f_frsize * statv.f_bfree)   # Actual number of free bytes
+	s = statvfs(DATA_DIR)
+	total = float(s.f_blocks)  # Size of filesystem in bytes
+	free = float(s.f_bfree)   # Actual number of free bytes
 	ratio = free/total
 	if ratio < SPACEFREE:
 		freespace = False
 	else:
 		freespace = True
 	if not freespace:
-		reason = "Out of space (ratio free:%.1f%%) in %s" % (ratio, DATA_DIR)
+		reason = "Not enough space (ratio free:%.1f%%, ) in %s" % (ratio, DATA_DIR)
 		logger.warning(reason)
 		return False
 	else:
