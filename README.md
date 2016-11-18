@@ -41,17 +41,19 @@ You can use args:  `exposure.py texp filename`
 You must configure with your location in config.yaml file (name, latitude, longitude, elevation).
 Other crucial parameters is data destination and logfile.
 
-When executing `main.py`, the program check previously camera is plugged, INDI is running, data location is accesible, space on disk and memory available (latest two parameters configurable in config.yaml)
+When executing `main.py`, the program check previously camera is plugged, INDI is running, data location is accesible, space on disk and memory available (latest two parameters configurable in config.yaml).
 Then, if it is daylight yet, wait to observe. In "Instrument parameters" you can configure exposures time or offset before/after sunset you want begin. When it will arrive time to start, Loop begins taking images with a short time exposure (configurable in config.yaml). While time go on and pass astronomical twilight, the exposure will be increment to exp_max parameter. Near sunrise, the time exposure will decresasing until the process stop adquiring and close.
 
 If you run this program on a RasberryPi with SenseHat module, you can show the status progress on led screen.
 
-You can use `shellscripts/pyOculus.sh` start/stop the program
+You can use `shellscripts/pyOculus.sh` start/stop the program:
 
-`shellscripts/pyOculus [start|stop|viewlog]`
+`shellscripts/pyOculus.sh [start|stop|viewlog]`
 
-The viewlog option show a console with lastest lines of logfile continuosly.
+The viewlog option show a console with lastest lines of logfile continously.
 
+Another option is scheduled with cron. By example:
+`30 13 * * * /home/pi/bin/pyOculus.sh start`
 
 ## Testing Setup (Pending changes)
 
