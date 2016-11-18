@@ -25,16 +25,33 @@ sudo make install
 
 You should already have `python` and `git` if you are using Raspbian.
 
-## Instructions (Pending changes)
-The INDI server handles all the communication with the camera, so the server has to be running for this code to be able to talk to the camera. In my case Oculus uses a Starlight Xpress CCD, so I started the camera with:
+## Instructions (UPDATED! 2016/11/18)
 
-`indiserver -v -m 100 indi_sx_ccd`
+The INDI server handles all the communication with the camera, so the server has to be running for this code to be able to talk to the camera. In our case Oculus uses a Starlight Xpress CCD, so we MUST started the INDI&camera with:
 
-This needs to be running when you do the next step, so open a new terminal (or if you are running headless, open another ssh session).
+`shellscript/indi.service start`
 
-`python snapper.py`
+It would be good idea run as a service. Then copy the script to /etc/init.d/ and execute `sudo rcconf` to enable (needs: rcconf package)
 
-will save a file called `latest.fits` after taking an image.
+To test, you can take an image with `exposure.py`. It takes an image of 10 sec will named "test_exposure.fits"
+You can use args:  `exposure.py texp filename`
+
+## Taking loop images (UPDATED! 2016/11/18)
+
+You must configure with your location in config.yaml file (name, latitude, longitude, elevation).
+Other crucial parameters is data destination and logfile.
+
+When executing `main.py`, the program check previously camera is plugged, INDI is running, data location is accesible, space on disk and memory available (latest two parameters configurable in config.yaml)
+Then, if it is daylight yet, wait to observe. In "Instrument parameters" you can configure exposures time or offset before/after sunset you want begin. When it will arrive time to start, Loop begins taking images with a short time exposure (configurable in config.yaml). While time go on and pass astronomical twilight, the exposure will be increment to exp_max parameter. Near sunrise, the time exposure will decresasing until the process stop adquiring and close.
+
+If you run this program on a RasberryPi with SenseHat module, you can show the status progress on led screen.
+
+You can use `shellscripts/pyOculus.sh` start/stop the program
+
+`shellscripts/pyOculus [start|stop|viewlog]`
+
+The viewlog option show a console with lastest lines of logfile continuosly.
+
 
 ## Testing Setup (Pending changes)
 
