@@ -62,7 +62,7 @@ def set_location():
 	elev = OBSERVATORY["elev"]
 	name = OBSERVATORY["name"]
 	timezone = "UTC"       	# Same computer clock works!
-	logoffset = -60			# To do test in daylight.
+	logoffset = 0			# To do test in daylight.
 	location = EarthLocation.from_geodetic((lon*u.deg+logoffset*u.deg), lat*u.deg, elev*u.m)
 	observatory = Observer(location=location, name=name, timezone=timezone)
 	return observatory
