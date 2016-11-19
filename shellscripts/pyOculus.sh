@@ -53,15 +53,23 @@ function webimage {
 }
 
 function makevideo {
-	# Next make a list of all .png files created in the last 15 minutes & 24hm and make a movie out of them
+	# Next make a list of all .png files created in the last 15 minutes and make a movie out of them
 	#if [ -f $PIDFILE ]; then
 		# Tonight
 		night=`date +%Y%m%d -d "-12 hour"`
 		find $DATADIR/png/$night/20*.png -type f -cmin -15 -exec cat {} \; | /usr/local/bin/ffmpeg -f image2pipe -framerate 5 -i - -s 696x520 -vcodec libx264  -pix_fmt yuv420p $DATADIR/tonight/latest_15m.mp4 -y
-		sleep 2
+	#fi
+}
+
+function video24h {
+	# Next make a list of all .png files created in the last 24h and make a movie out of them
+	#if [ -f $PIDFILE ]; then
+		# Tonight
+		night=`date +%Y%m%d -d "-12 hour"`
 		find $DATADIR/png/$night/20*.png -type f -cmin -1440 -exec cat {} \; | /usr/local/bin/ffmpeg -f image2pipe -framerate 5 -i - -s 696x520 -vcodec libx264  -pix_fmt yuv420p $DATADIR/tonight/latest_24h.mp4 -y
 	#fi
 }
+
 
 
 case "$1" in
@@ -76,15 +84,17 @@ case "$1" in
   viewlog)
 	viewlog
 	;;
-  makevideo)
-	makevideo
-	;;
   webimage)
 	webimage
 	;;
-
+  makevideo)
+	makevideo
+	;;
+  video24h)
+	video24h
+	;;
   *)
-    echo "Usage: $0 {start|stop|viewlog|webimage|makevideo}"
+    echo "Usage: $0 {start|stop|viewlog|webimage|makevideo|video24}"
 esac
 
 
