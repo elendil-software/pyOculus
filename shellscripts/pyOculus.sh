@@ -5,6 +5,7 @@ DATADIR=$ROOTDIR"/data/oaj/allsky"
 
 SCRIPTPATH="/home/pi/pyOculus/pyOculus"
 SCRIPT="./main.py"
+SENSE="./sensehat.py"	# Empty to disable.
 
 PIDFILE=$ROOTDIR"/data/oaj/allsky/status/pyOculus.pid"
 LOGFILE=$ROOTDIR"/data/oaj/allsky/status/pyOculus.txt.log"
@@ -27,6 +28,9 @@ function start {
 	echo 'Starting pyOculus…' >&2
 	cd $SCRIPTPATH
 	$SCRIPT &
+	if [ ! -z "$SENSE" ]; then
+		$SENSE "beg"
+	fi
 	echo $! > "$PIDFILE"
 	echo 'Process started' >&2
 }
@@ -40,6 +44,10 @@ function stop {
 	echo 'Stopping service…' >&2
 	kill -15 $(cat "$PIDFILE") && rm -f "$PIDFILE"
 	echo 'Process stopped' >&2
+	if [ ! -z "$SENSE" ]; then
+		$SENSE "stp"
+	fi
+
 }
 
 function viewlog {

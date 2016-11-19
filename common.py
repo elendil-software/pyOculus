@@ -5,7 +5,7 @@ import astropy.units as u
 from astroplan import Observer
 
 # My libs
-from config import OBSERVATORY, SUNDT, SHMOD, SHORI
+from config import OBSERVATORY, SUNDT
 from config import logger
 
 
@@ -52,35 +52,6 @@ class Night():
 		del currenttime
 		return night8
 	
-
-if SHMOD == True:
-	'''	
-	To use SenseHat modul if you like (enable on config.yaml)
-	'''	
-	from random import randint
-	from sense_hat import SenseHat
-	sensehat = SenseHat()
-	sensehat.low_light = True
-	sensehat.set_rotation(SHORI)
-
-	def shvalue(value):
-		if value == "ini":
-			sensehat.clear()
-			sensehat.show_letter("i",text_colour=(255,255,255)) # White
-		elif value == "exp":
-			sensehat.set_pixel(randint(0,7),randint(0,7),(255,0,0)) # Red
-		elif value == "day":
-			sensehat.show_letter("d",text_colour=(255,255,0)) # Yellow
-		elif value == "err":
-			sensehat.show_letter("E",text_colour=(255,0,0)) # Red
-		elif value == "fin":
-			sensehat.show_letter("F",text_colour=(0,0,255)) # Blue
-		elif value == "":
-			sensehat.clear()
-		else:
-			sensehat.clear()
-
-
 def set_location():
 	'''
 	Establishing observatory location with astroplan.Observer
@@ -91,7 +62,7 @@ def set_location():
 	elev = OBSERVATORY["elev"]
 	name = OBSERVATORY["name"]
 	timezone = "UTC"       	# Same computer clock works!
-	logoffset = 0			# To do test in daylight.
+	logoffset = -60			# To do test in daylight.
 	location = EarthLocation.from_geodetic((lon*u.deg+logoffset*u.deg), lat*u.deg, elev*u.m)
 	observatory = Observer(location=location, name=name, timezone=timezone)
 	return observatory

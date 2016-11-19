@@ -16,13 +16,14 @@ from config import SCRIPTPATH, DATA_DIR, INSTR_ID, SHMOD, EXP_MAX, EXP_MIN
 from config import logger
 from common import Night, set_location
 from check import check_prev, check_dir, check_space, check_memory
+
 import outputs
 
 '''
 To use SenseHat Module to show progress
 '''
 if SHMOD == True:
-	from common import shvalue
+	from sensehat import shvalue
 	shvalue("ini")
 
 
@@ -139,7 +140,8 @@ def do_obs_loop(tonight):
 			logger.info(reason)
 			sleep(1)
 			obsloop = False
-			if SHMOD == True: shvalue("fin")
+			if SHMOD == True: 
+				shvalue("fin")
 			break
 		else:
 			if SHMOD == True:
@@ -177,8 +179,8 @@ if __name__ == '__main__':
 		# Check currenttime in range to observe
 		now = datetime.utcnow()
 		if now < tonight.obsstart:
-			wait = (tonigh.obsstart - now).seconds
-			logger.warning("Too early. Waiting %.0f minutes" % wait/60.)
+			wait = (tonight.obsstart - now).seconds
+			logger.info("Too early. Waiting %.0f hours" % (wait/3600.))
 			if SHMOD == True: shvalue("day")
 			sleep(wait)
 			pass
