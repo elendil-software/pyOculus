@@ -1,10 +1,10 @@
 ####### Basic config
 Basic:
+  data_dir:  '/media/pi/ALLSKY_USB/data/oaj/allsky'   # Place to save data
+  loglevel:  'INFO'                                   # DEBUG, INFO, WARNING
+  logfile:   '/tmp/pyOculus.txt'                      # Logfile
   memfree:   0.33  # min free memory ratio to do a loop. (1=totally mem used)
   spacefree: 0.10  # min free space ratio in directory,  (1=totally space used)
-  data_dir:  '/media/pi/ALLSKY_USB/data/oaj/allsky'   # Place to save data
-  loglevel:  'INFO'                             # DEBUG, INFO, WARNING
-  logfile:   '/tmp/pyOculus.txt'                    # Logfile
 
 ####### Observatory Location
 Observatory:
@@ -28,5 +28,5 @@ Instru:
 # SenseHat module
 SenseHat:
   enable:  True  # enable SenseHat hardware module       [True/False]
-  ori:  270   # orientation SenseHat message          [degrees] 
+  ori:     270   # orientation SenseHat message          [0, 90, 180, 270 degrees] 
 
