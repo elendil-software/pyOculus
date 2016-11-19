@@ -1,8 +1,10 @@
 ####### Basic config
 Basic:
-  data_dir:  '/media/pi/ALLSKY_USB/data/oaj/allsky'   # Place to save data
-  loglevel:  'INFO'                                   # DEBUG, INFO, WARNING
-  logfile:   '/tmp/pyOculus.txt'                      # Logfile
+  #data_dir:  '/media/pi/ALLSKY_USB/data/oaj/allsky'   # Place to save data
+  #logfile:   '/tmp/pyOculus.txt'                      # Logfile
+  data_dir:  '/mnt/monitorstorage/data/oaj/allsky'     # Place to save data
+  logfile:   '/mnt/monitorstorage/data/oaj/allsky/status/pyOculus.txt' # Logfile
+  loglevel:  'INFO'     # DEBUG, INFO, WARNING
   memfree:   0.33  # min free memory ratio to do a loop. (1=totally mem used)
   spacefree: 0.10  # min free space ratio in directory,  (1=totally space used)
 

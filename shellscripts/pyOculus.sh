@@ -1,13 +1,13 @@
 #!/bin/bash
 
-SCRIPTPATH="/home/pi/pyOculus/pyOculus"
-SCRIPT="./main.py"
-PIDFILE=$SCRIPTPATH"/run/pyOculus.pid"
-RUNAS="pi"
-
 ROOTDIR="/mnt/monitorstorage"
 DATADIR=$ROOTDIR"/data/oaj/allsky"
-LOGFILE="/tmp/pyOculus.txt.log"
+
+SCRIPTPATH="/home/pi/pyOculus/pyOculus"
+SCRIPT="./main.py"
+
+PIDFILE=$ROOTDIR"/data/oaj/allsky/status/pyOculus.pid"
+LOGFILE=$ROOTDIR"/data/oaj/allsky/status/pyOculus.txt.log"
 
 
 function mountdir {
@@ -69,7 +69,6 @@ function video24h {
 		find $DATADIR/png/$night/20*.png -type f -cmin -1440 -exec cat {} \; | /usr/local/bin/ffmpeg -f image2pipe -framerate 5 -i - -s 696x520 -vcodec libx264  -pix_fmt yuv420p $DATADIR/tonight/latest_24h.mp4 -y
 	#fi
 }
-
 
 
 case "$1" in
