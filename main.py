@@ -139,6 +139,7 @@ def do_obs_loop(tonight):
 			logger.info(reason)
 			sleep(1)
 			obsloop = False
+			if SHMOD == True: shvalue("fin")
 			break
 		else:
 			if SHMOD == True:
@@ -186,6 +187,5 @@ if __name__ == '__main__':
 			# do images in a loop
 			if not do_obs_loop(tonight):
 				break
-				
-	if SHMOD == True: shvalue("fin")
+
 	# Fin

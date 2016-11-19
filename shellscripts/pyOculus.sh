@@ -49,10 +49,12 @@ function viewlog {
 
 function webimage {
 	# Convert latest PNG to JPG for webpage
-	convert -quality 90% -resize 75% $DATADIR/tonight/latest.png $DATADIR/tonight/latest.jpg
+	if [ -f $PIDFILE ]; then
+		convert -quality 90% -resize 75% $DATADIR/tonight/latest.png $DATADIR/tonight/latest.jpg
+	fi
 }
 
-function makevideo {
+function make_avi15m {
 	# Next make a list of all .png files created in the last 15 minutes and make a movie out of them
 	#if [ -f $PIDFILE ]; then
 		# Tonight
@@ -61,13 +63,21 @@ function makevideo {
 	#fi
 }
 
-function video24h {
+function make_avi24h {
 	# Next make a list of all .png files created in the last 24h and make a movie out of them
 	#if [ -f $PIDFILE ]; then
 		# Tonight
 		night=`date +%Y%m%d -d "-12 hour"`
 		find $DATADIR/png/$night/20*.png -type f -cmin -1440 -exec cat {} \; | /usr/local/bin/ffmpeg -f image2pipe -framerate 5 -i - -s 696x520 -vcodec libx264  -pix_fmt yuv420p $DATADIR/tonight/latest_24h.mp4 -y
 	#fi
+}
+
+function make_gif {
+	if [ -f $PIDFILE ]; then
+		night=`date +%Y%m%d -d "-12 hour"`
+		find $DATADIR/png/$night/20*.png -type f -cmin $1 > $DATADIR/tonight/$2
+		convert @$DATADIR/tonight/$2 -delay 20 -loop 0 $DATADIR/tonight/$3
+	fi
 }
 
 
@@ -86,14 +96,15 @@ case "$1" in
   webimage)
 	webimage
 	;;
-  makevideo)
-	makevideo
+  gif15m)
+	make_gif -15 latest_15m.list latest_15m.gif
 	;;
-  video24h)
-	video24h
+  gif24h)
+	make_gif -1440 latest_24h.list latest_24h.gif
 	;;
+
   *)
-    echo "Usage: $0 {start|stop|viewlog|webimage|makevideo|video24}"
+    echo "Usage: $0 {start|stop|viewlog|webimage|gif15m|gif24h}"
 esac
 
 
