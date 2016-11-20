@@ -152,7 +152,7 @@ def do_obs_loop(tonight):
 			logger.info(info)
 			_take_images(tonight)
 			if SHMOD == True:
-				shvalue("")
+				shvalue("clr")
 			sleep(0.1)
 	
 	return obsloop
