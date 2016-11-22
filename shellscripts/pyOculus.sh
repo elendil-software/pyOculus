@@ -106,15 +106,21 @@ make_avi24h() {
 	#if [ -f $PIDFILE ]; then
 		# Tonight
 		night=`date +%Y%m%d -d "-12 hour"`
-		find $DATADIR/png/$night/20*.png -type f -cmin -1440 -exec cat {} \; | /usr/local/bin/ffmpeg -f image2pipe -framerate 5 -i - -s 696x520 -vcodec libx264  -pix_fmt yuv420p $DATADIR/tonight/latest_24h.mp4 -y
+		find $DATADIR/png/$night/*.png -type f -cmin -1440 -exec cat {} \; | /usr/local/bin/ffmpeg -f image2pipe -framerate 5 -i - -s 696x520 -vcodec libx264  -pix_fmt yuv420p $DATADIR/tonight/latest_24h.mp4 -y
 	#fi
 }
 
 make_gif() {
 	if [ -f $PIDFILE ]; then
 		night=`date +%Y%m%d -d "-12 hour"`
-		find $DATADIR/png/$night/20*.png -type f -cmin $1 > $DATADIR/tonight/$2
-		convert @$DATADIR/tonight/$2 -delay 20 -loop 0 $DATADIR/tonight/$3
+		#find $DATADIR/png/$night/20*.png -type f -cmin $1 
+		find $DATADIR/png/$night/*.png -type f  -cmin +1 -print0 | \
+			xargs -0 -I{} find '{}' -cmin -15 \
+			> /tmp/$2 && \
+		nice -n 5 convert -delay 10 -loop 0 \
+			@/tmp/$2 > /tmp/$3
+		cp /tmp/$2 $DATADIR/tonight/$2
+		cp /tmp/$3 $DATADIR/tonight/$3
 	fi
 }
 
@@ -172,4 +178,3 @@ case "$1" in
   *)
     echo "Usage: $0 {start|stop|restart|viewlog|webimage|gif15m|gif24h}"
 esac
-mo
