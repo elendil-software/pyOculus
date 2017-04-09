@@ -19,16 +19,17 @@ Observatory:
 
 ####### Instrument parameters
 Instru:
-  name:      'Starlight Xpress AllSky Oculus'   # Name
-  device:    'SX CCD SuperStar'     # To identify using INDI
-  usbtag:    'Starlight Xpress'     # To identify using lsusb command
-  id:        'allsky'               # prefix of images. UPAD id too (Only for OAJ/ceFca code)
-  expo_max:  10                     # max time exposure (in seconds)
-  expo_min:  0.5                    # min time exposure (in seconds)
-  sundt:     30                     # time before/after sunset/sunrise to begin (in minutes)
+  name:                   'Starlight Xpress AllSky Oculus'   # Name
+  device:                 'SX CCD SuperStar'     # To identify using INDI
+  usbtag:                 'Starlight Xpress'     # To identify using lsusb command
+  id:                     'allsky'               # prefix of images. UPAD id too (Only for OAJ/ceFca code)
+  expo_max:               10                     # max time exposure (in seconds)
+  expo_min:               0.5                    # min time exposure (in seconds)
+  sundt:                  30                     # time before/after sunset/sunrise to begin (in minutes)
+  expose_during_daytime:  True
 
 # SenseHat module
 SenseHat:
-  enable:  True  # enable SenseHat hardware module       [True/False]
+  enable:  False  # enable SenseHat hardware module       [True/False]
   ori:     270   # orientation SenseHat message          [0, 90, 180, 270 degrees] 
 

@@ -38,23 +38,24 @@ def _set_logger(logfile, loglevel):
 SCRIPTPATH = _get_scriptpath()
 _cfgdata = _get_config(SCRIPTPATH)
 
-MEMFREE =	_cfgdata["Basic"]["memfree"]
-SPACEFREE =	_cfgdata["Basic"]["spacefree"]
+MEMFREE =				_cfgdata["Basic"]["memfree"]
+SPACEFREE =				_cfgdata["Basic"]["spacefree"]
 
-DATA_DIR = 	_cfgdata["Basic"]["data_dir"]
-OBSERVATORY=_cfgdata["Observatory"]
+DATA_DIR = 				_cfgdata["Basic"]["data_dir"]
+OBSERVATORY=			_cfgdata["Observatory"]
 
-INSTR_DEV = _cfgdata["Instru"]["device"]
-INSTR_TAG = _cfgdata["Instru"]["usbtag"]
-INSTR_ID = 	_cfgdata["Instru"]["id"]
-EXP_MAX =	_cfgdata["Instru"]["expo_max"]
-EXP_MIN =  	_cfgdata["Instru"]["expo_min"]
-SUNDT = 	_cfgdata["Instru"]["sundt"]
+INSTR_DEV = 			_cfgdata["Instru"]["device"]
+INSTR_TAG =				_cfgdata["Instru"]["usbtag"]
+INSTR_ID =			 	_cfgdata["Instru"]["id"]
+EXP_MAX =				_cfgdata["Instru"]["expo_max"]
+EXP_MIN =  				_cfgdata["Instru"]["expo_min"]
+SUNDT = 				_cfgdata["Instru"]["sundt"]
+EXPOSE_DURING_DAYTIME = _cfgdata["Instru"]["expose_during_daytime"]
 
 logger = _set_logger( \
 	_cfgdata["Basic"]["logfile"], _cfgdata["Basic"]["loglevel"])
 
-SHMOD = 	_cfgdata["SenseHat"]["enable"]
-SHORI = 	_cfgdata["SenseHat"]["ori"]
+SHMOD = 				_cfgdata["SenseHat"]["enable"]
+SHORI = 				_cfgdata["SenseHat"]["ori"]
 
 
