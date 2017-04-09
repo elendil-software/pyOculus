@@ -2,18 +2,18 @@
 Basic:
   #data_dir:  '/media/pi/ALLSKY_USB/data/oaj/allsky'   # Place to save data
   #logfile:   '/tmp/pyOculus.txt'                      # Logfile
-  data_dir:  '/mnt/monitorstorage/data/oaj/allsky'     # Place to save data
-  logfile:   '/mnt/monitorstorage/data/oaj/allsky/status/pyOculus.txt' # Logfile
-  loglevel:  'INFO'     # DEBUG, INFO, WARNING
+  data_dir:  '/home/pi/AllSkyCamera'     # Place to save data
+  logfile:   '/home/pi/AllSkyCamera/logs/pyOculus.txt' # Logfile
+  loglevel:  'DEBUG'     # DEBUG, INFO, WARNING
   memfree:   0.33  # min free memory ratio to do a loop. (1=totally mem used)
   spacefree: 0.10  # min free space ratio in directory,  (1=totally space used)
 
 ####### Observatory Location
 Observatory:
-  name: "OAJ"
-  lati: 40.0422222
-  long: -01.0163889
-  elev: 1957          # elevation in meters
+  name: "La_Ferriere"
+  lati: 47
+  long: 6
+  elev: 1022          # elevation in meters
   temp: 5             # temperature in Celcius
   prss: 800           # air pressure in mbars
 
