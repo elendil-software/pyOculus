@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from shutil import copyfile
 
 # My libs
-from config import SCRIPTPATH, DATA_DIR, INSTR_ID, SHMOD, EXP_MAX, EXP_MIN, EXPOSE_DURING_DAYTIME
+from config import SCRIPTPATH, DATA_DIR, INSTR_ID, SHMOD, EXP_MAX, EXP_MIN, EXPOSE_DURING_DAYTIME, EXPOSURE_INTERVAL
 from config import logger
 from common import Night, set_location
 from check import check_prev, check_dir, check_space, check_memory
@@ -153,7 +153,7 @@ def do_obs_loop(tonight):
 			_take_images(tonight)
 			if SHMOD == True:
 				shvalue("clr")
-			sleep(0.1)
+			sleep(EXPOSURE_INTERVAL)
 	
 	return obsloop
 

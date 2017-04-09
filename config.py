@@ -51,6 +51,7 @@ EXP_MAX =				_cfgdata["Instru"]["expo_max"]
 EXP_MIN =  				_cfgdata["Instru"]["expo_min"]
 SUNDT = 				_cfgdata["Instru"]["sundt"]
 EXPOSE_DURING_DAYTIME = _cfgdata["Instru"]["expose_during_daytime"]
+EXPOSURE_INTERVAL = 	_cfgdata["Instru"]["exposure_interval"]
 
 logger = _set_logger( \
 	_cfgdata["Basic"]["logfile"], _cfgdata["Basic"]["loglevel"])
