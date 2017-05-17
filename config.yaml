@@ -24,10 +24,10 @@ Instru:
   usbtag:                 'Starlight Xpress'     # To identify using lsusb command
   id:                     'allsky'               # prefix of images. UPAD id too (Only for OAJ/ceFca code)
   expo_max:               10                     # max time exposure (in seconds)
-  expo_min:               0.5                    # min time exposure (in seconds)
+  expo_min:               0.1                    # min time exposure (in seconds)
   sundt:                  30                     # time before/after sunset/sunrise to begin (in minutes)
-  expose_during_daytime:  True                   # enable/disable exposure during daytime
-  exposure_interval:      10                     # time in seconds between two exposures
+  expose_during_daytime:  False                   # enable/disable exposure during daytime
+  exposure_interval:      30                     # time in seconds between two exposures
 
 # SenseHat module
 SenseHat:
