@@ -1,5 +1,6 @@
 import numpy
 from astropy.io import fits
+from astropy.visualization import (LogStretch)
 from PIL import Image, ImageFont, ImageDraw
 import json
 
@@ -8,17 +9,15 @@ import json
 def make_image(parms, fitsfile, pngfile):
 	'''
 	Function to read in the FITS file from Oculus.
-	- find the 99.5% value
-	- Make all values above 99.5% value white
+	- performe a LogStretch
 	- Write image array to a PNG
 	'''
-	data = fits.getdata(fitsfile)
-	#data1 = data.reshape(data.shape[0]*data.shape[1])
-	max_val = numpy.percentile(data,99.5)
-	scaled = data*256./max_val
-	new_scaled = numpy.ma.masked_greater(scaled, 255.)
-	new_scaled.fill_value=255.
-	img_data = new_scaled.filled()
+	img_data = fits.getdata(fitsfile)
+	img_data = img_data - numpy.min(img_data)
+	img_data = img_data / numpy.max(img_data)
+	stretch = LogStretch()
+	img_data = stretch(img_data)
+	img_data = img_data * 255
 	result = Image.fromarray(img_data.astype(numpy.uint8))
 	fontB = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 32)
 	fontS = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 24)
@@ -35,7 +34,6 @@ def make_image(parms, fitsfile, pngfile):
 	draw.text((10, 100), expotxt, font=fontS, fill=255)
 	result.save(pngfile)
 	del fontB, fontS, titletxt, timetxt, expotxt
-	del data, scaled, new_scaled, max_val
 	del img_data, result, draw
 	return
 
