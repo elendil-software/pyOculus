@@ -46,8 +46,8 @@ def make_json(parms, jsonfile):
 	'expo' : parms['exp']
 	}
 	latestjson = json.dumps(latestdata)
-	f = open(jsonfile,'wb')
-	f.write(latestjson)
+	f = open(jsonfile,'w')
+	f.write("%s" % latestjson)
 	f.close()
 	del f, latestjson, latestdata
 	return

@@ -4,13 +4,13 @@ Basic:
   #logfile:   '/tmp/pyOculus.txt'                      # Logfile
   data_dir:  '/home/pi/AllSkyCamera'     # Place to save data
   logfile:   '/home/pi/AllSkyCamera/logs/pyOculus.txt' # Logfile
-  loglevel:  'DEBUG'     # DEBUG, INFO, WARNING
+  loglevel:  'INFO'     # DEBUG, INFO, WARNING
   memfree:   0.33  # min free memory ratio to do a loop. (1=totally mem used)
   spacefree: 0.10  # min free space ratio in directory,  (1=totally space used)
 
 ####### Observatory Location
 Observatory:
-  name: "La_Ferriere"
+  name: ""
   lati: 47
   long: 6
   elev: 1022          # elevation in meters
@@ -27,7 +27,7 @@ Instru:
   expo_min:               0.1                    # min time exposure (in seconds)
   sundt:                  30                     # time before/after sunset/sunrise to begin (in minutes)
   expose_during_daytime:  False                   # enable/disable exposure during daytime
-  exposure_interval:      30                     # time in seconds between two exposures
+  exposure_interval:      50                     # time in seconds between two exposures
 
 # SenseHat module
 SenseHat:

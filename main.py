@@ -140,14 +140,14 @@ def do_obs_loop(tonight):
 			logger.info(reason)
 			sleep(1)
 			obsloop = False
-			if SHMOD == True: 
+			if SHMOD == True:
 				shvalue("fin")
 			break
 		else:
 			if SHMOD == True:
 				shvalue("exp")
 			info = "Taking image %i... " % (j)
-			if j % 10 == 0 or j == 1: 
+			if j % 10 == 0 or j == 1:
 				info += "(time end obs: %.1f hours)" % ((tonight.obsend - now).seconds/3600.)
 			logger.info(info)
 			_take_images(tonight)
@@ -163,7 +163,7 @@ if __name__ == '__main__':
 	
 	if SHMOD == True: shvalue("ini")
 	logger.info(">>>>>>>> Begining" )
-	# Establishing and Calculating  
+	# Establishing and Calculating
 	observatory = set_location()
 	now = datetime.utcnow()
 	tonight = Night(observatory, now)
@@ -173,9 +173,10 @@ if __name__ == '__main__':
 	while True or i < 9999:
 		i += 1
 		# Check prerequisities
-		if not check_prev():
-			shvalue("err")
-			break
+		#TODO : to correct, doesn't work with Python 3.6
+		#if not check_prev():
+		#	shvalue("err")
+		#	break
 		# Check currenttime in range to observe
 		now = datetime.utcnow()
 		if now < tonight.obsstart and not EXPOSE_DURING_DAYTIME:
